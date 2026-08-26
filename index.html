@@ -1,0 +1,1302 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>iMessage 截图生成器</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #19202a;
+      --muted: #6f7885;
+      --line: #dfe4eb;
+      --panel: #ffffff;
+      --page: #eef2f6;
+      --blue: #087cf0;
+      --blue-dark: #006bd7;
+      --danger: #c93f45;
+      --radius: 18px;
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { min-width: 320px; background: var(--page); }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 9% 4%, rgba(8, 124, 240, .09), transparent 28rem),
+        var(--page);
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    button, select, input[type="range"] { cursor: pointer; }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible,
+    summary:focus-visible {
+      outline: 3px solid rgba(8, 124, 240, .22);
+      outline-offset: 2px;
+    }
+
+    .app {
+      width: min(1480px, 100%);
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    .app-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 22px;
+    }
+
+    .eyebrow {
+      margin: 0 0 7px;
+      color: var(--blue-dark);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(25px, 3vw, 38px);
+      line-height: 1.08;
+      letter-spacing: -.035em;
+    }
+
+    .subtitle {
+      max-width: 720px;
+      margin: 9px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .offline-badge {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border: 1px solid #d5dde7;
+      border-radius: 999px;
+      color: #4d5967;
+      background: rgba(255, 255, 255, .76);
+      font-size: 12px;
+      font-weight: 750;
+      box-shadow: 0 7px 22px rgba(45, 61, 82, .06);
+    }
+
+    .offline-badge::before {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #30b463;
+      content: "";
+      box-shadow: 0 0 0 3px rgba(48, 180, 99, .13);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(410px, 1fr) minmax(410px, .95fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .card {
+      border: 1px solid rgba(207, 215, 225, .9);
+      border-radius: 22px;
+      background: var(--panel);
+      box-shadow: 0 16px 45px rgba(38, 53, 74, .09);
+    }
+
+    .editor { overflow: hidden; }
+
+    .section {
+      padding: 22px;
+      border-bottom: 1px solid #e8ecf1;
+    }
+
+    .section:last-child { border-bottom: 0; }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    h2, h3 { margin: 0; }
+
+    h2 {
+      font-size: 16px;
+      letter-spacing: -.015em;
+    }
+
+    .section-note {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .fields {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .field { display: grid; gap: 7px; }
+
+    .field.wide { grid-column: 1 / -1; }
+
+    label, .field-label {
+      color: #4d5866;
+      font-size: 12px;
+      font-weight: 760;
+    }
+
+    input[type="text"], select, textarea {
+      width: 100%;
+      border: 1px solid #d6dde6;
+      border-radius: 11px;
+      color: var(--ink);
+      background: #fbfcfd;
+      transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+
+    input[type="text"], select { height: 42px; padding: 0 12px; }
+
+    textarea {
+      min-height: 82px;
+      padding: 10px 12px;
+      line-height: 1.45;
+      resize: vertical;
+    }
+
+    .bulk-textarea {
+      min-height: 172px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 13px;
+    }
+
+    input[type="text"]:focus, select:focus, textarea:focus {
+      border-color: #72b7f7;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(8, 124, 240, .08);
+      outline: 0;
+    }
+
+    .battery-row {
+      display: grid;
+      grid-template-columns: 1fr 46px;
+      align-items: center;
+      gap: 10px;
+      min-height: 42px;
+    }
+
+    input[type="range"] { width: 100%; accent-color: var(--blue); }
+
+    .battery-value {
+      color: #586474;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .messages-list { display: grid; gap: 12px; }
+
+    .message-card {
+      display: grid;
+      grid-template-columns: 78px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border: 1px solid #dfe5ec;
+      border-radius: 14px;
+      background: #fafbfd;
+    }
+
+    .message-card.is-b { border-left: 4px solid #0b84f3; }
+    .message-card.is-tj { border-left: 4px solid #b6bcc5; }
+
+    .sender-select { height: 38px; padding: 0 9px; background: #fff; }
+
+    .message-text { min-height: 66px; background: #fff; }
+
+    .message-actions {
+      display: grid;
+      grid-template-columns: repeat(2, 30px);
+      gap: 6px;
+    }
+
+    .icon-button {
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border: 1px solid #d7dee7;
+      border-radius: 9px;
+      color: #536071;
+      background: #fff;
+      font-size: 14px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .icon-button:hover:not(:disabled) { border-color: #aeb9c7; background: #f3f6f9; }
+    .icon-button:disabled { cursor: default; opacity: .32; }
+    .icon-button.delete { grid-column: 1 / -1; width: 66px; color: var(--danger); }
+
+    .button {
+      display: inline-flex;
+      min-height: 40px;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 14px;
+      border: 1px solid #d3dbe5;
+      border-radius: 11px;
+      color: #384454;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 760;
+      line-height: 1.2;
+    }
+
+    .button:hover { border-color: #aeb9c7; background: #f7f9fb; }
+
+    .button.primary {
+      border-color: var(--blue);
+      color: #fff;
+      background: var(--blue);
+      box-shadow: 0 8px 18px rgba(8, 124, 240, .2);
+    }
+
+    .button.primary:hover { border-color: var(--blue-dark); background: var(--blue-dark); }
+
+    .button.soft-blue { border-color: #bddcf8; color: #066dce; background: #edf7ff; }
+
+    .button-row { display: flex; flex-wrap: wrap; gap: 9px; }
+
+    .preview-column { position: sticky; top: 20px; }
+
+    .preview-card { padding: 20px; }
+
+    .preview-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .preview-toolbar .button-row { justify-content: flex-end; }
+
+    .device-stage {
+      display: grid;
+      min-height: 590px;
+      place-items: center;
+      padding: 24px;
+      border: 1px solid #dfe5ed;
+      border-radius: 17px;
+      background:
+        linear-gradient(45deg, #e9edf2 25%, transparent 25%),
+        linear-gradient(-45deg, #e9edf2 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #e9edf2 75%),
+        linear-gradient(-45deg, transparent 75%, #e9edf2 75%),
+        #f2f5f8;
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+    }
+
+    #previewCanvas {
+      display: block;
+      width: min(390px, 100%);
+      height: auto;
+      aspect-ratio: 390 / 844;
+      background: #fff;
+      box-shadow: 0 22px 54px rgba(36, 47, 62, .24), 0 0 0 1px rgba(21, 34, 49, .08);
+    }
+
+    .preview-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 13px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .overflow-warning {
+      color: #9f5a00;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    details { color: #4f5b6a; font-size: 13px; line-height: 1.6; }
+    summary { cursor: pointer; color: #283444; font-weight: 760; }
+    details ol { margin: 13px 0 0; padding-left: 20px; }
+    details li + li { margin-top: 5px; }
+
+    .privacy-note {
+      margin: 13px 0 0;
+      padding: 10px 12px;
+      border-radius: 10px;
+      color: #536071;
+      background: #f3f6f9;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .toast {
+      position: fixed;
+      z-index: 20;
+      left: 50%;
+      bottom: 24px;
+      max-width: min(88vw, 460px);
+      padding: 11px 16px;
+      border-radius: 999px;
+      color: #fff;
+      background: rgba(26, 33, 43, .94);
+      box-shadow: 0 14px 34px rgba(0, 0, 0, .22);
+      font-size: 13px;
+      font-weight: 680;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 12px);
+      transition: opacity .18s ease, transform .18s ease;
+    }
+
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+    @media (max-width: 980px) {
+      .workspace { grid-template-columns: 1fr; }
+      .preview-column { position: static; order: -1; }
+      .device-stage { min-height: 0; }
+    }
+
+    @media (max-width: 620px) {
+      .app { padding: 14px; }
+      .app-header { align-items: flex-start; flex-direction: column; }
+      .workspace { gap: 14px; }
+      .card { border-radius: 17px; }
+      .section, .preview-card { padding: 16px; }
+      .fields { grid-template-columns: 1fr; }
+      .field.wide { grid-column: auto; }
+      .message-card { grid-template-columns: 72px minmax(0, 1fr); }
+      .message-actions { grid-column: 1 / -1; display: flex; }
+      .icon-button.delete { width: 30px; }
+      .preview-toolbar { align-items: flex-start; flex-direction: column; }
+      .preview-toolbar .button-row { justify-content: flex-start; }
+      .device-stage { padding: 14px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">Offline screenshot studio</p>
+        <h1>iMessage 截图生成器</h1>
+        <p class="subtitle">编辑内容、实时预览，再直接导出高清 PNG。所有数据只在当前浏览器中处理，不上传网络，也不需要安装任何依赖。</p>
+      </div>
+      <span class="offline-badge">单文件 · 完全离线</span>
+    </header>
+
+    <div class="workspace">
+      <section class="editor card" aria-label="对话编辑区">
+        <div class="section">
+          <div class="section-heading">
+            <div>
+              <h2>整段粘贴</h2>
+              <p class="section-note">每条消息以 TJ: 或 B: 开头；识别标记不会显示在气泡里。粘贴后自动排版。</p>
+            </div>
+          </div>
+          <div class="field">
+            <label for="bulkConversation">对话文本</label>
+            <textarea id="bulkConversation" class="bulk-textarea" spellcheck="false" placeholder="TJ: You said my comms encryption had twenty-three bugs.&#10;B: Yes&#10;B: T tried to fix some of them.&#10;TJ: How many are left?&#10;B: Fifty-five."></textarea>
+          </div>
+          <div class="button-row" style="margin-top: 10px;">
+            <button id="parseConversation" class="button soft-blue" type="button">识别并替换消息</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-heading">
+            <div>
+              <h2>顶部信息</h2>
+              <p class="section-note">状态栏时间固定为 9:41。</p>
+            </div>
+          </div>
+          <div class="fields">
+            <div class="field">
+              <label for="contactName">联系人名称</label>
+              <input id="contactName" type="text" maxlength="36" autocomplete="off" value="TJ">
+            </div>
+            <div class="field">
+              <label for="avatarLetter">头像字母</label>
+              <input id="avatarLetter" type="text" maxlength="2" autocomplete="off" value="T">
+            </div>
+            <div class="field">
+              <label for="networkType">网络显示</label>
+              <select id="networkType">
+                <option value="5G">5G</option>
+                <option value="wifi">Wi-Fi</option>
+              </select>
+            </div>
+            <div class="field">
+              <span class="field-label">电量</span>
+              <div class="battery-row">
+                <input id="batteryLevel" type="range" min="1" max="100" value="82" aria-label="电量百分比">
+                <output id="batteryValue" class="battery-value" for="batteryLevel">82%</output>
+              </div>
+            </div>
+            <div class="field wide">
+              <label for="timeSeparator">唯一时间分隔</label>
+              <input id="timeSeparator" type="text" maxlength="60" autocomplete="off" value="Today 7:14 PM">
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-heading">
+            <div>
+              <h2>消息</h2>
+              <p class="section-note">B = 右侧蓝色；TJ = 左侧灰色。文本会原样显示。</p>
+            </div>
+            <button id="addMessage" class="button soft-blue" type="button">＋ 添加消息</button>
+          </div>
+          <div id="messagesList" class="messages-list"></div>
+        </div>
+
+        <div class="section">
+          <div class="section-heading">
+            <div>
+              <h2>文件与副本</h2>
+              <p class="section-note">JSON 可用于稍后恢复或批量保存不同版本。</p>
+            </div>
+          </div>
+          <div class="button-row">
+            <button id="saveJson" class="button" type="button">保存 JSON</button>
+            <button id="loadJson" class="button" type="button">从 JSON 恢复</button>
+            <button id="duplicatePage" class="button" type="button">复制为新标签页</button>
+          </div>
+          <input id="jsonFile" class="sr-only" type="file" accept="application/json,.json">
+        </div>
+
+        <div class="section">
+          <details>
+            <summary>如何使用</summary>
+            <ol>
+              <li>把以 TJ: 或 B: 开头的整段文字粘贴到输入框，页面会自动识别并排版。</li>
+              <li>也可以单独编辑联系人、时间、网络和每条消息；右侧预览会立即更新。</li>
+              <li>用每条消息旁的 ↑、↓ 调整顺序，或用“删除”移除。</li>
+              <li>点击“导出 PNG”，即可保存 786 × 1704 的截图。</li>
+              <li>点击“保存 JSON”备份配置；以后可用“从 JSON 恢复”继续编辑。</li>
+              <li>“复制为新标签页”会把当前内容复制到一个独立页面，方便连续制作多张截图。</li>
+            </ol>
+            <p class="privacy-note">提示：制作和分享模拟对话时，请避免冒充他人、误导受众或泄露真实隐私信息。</p>
+          </details>
+        </div>
+      </section>
+
+      <aside class="preview-column" aria-label="截图预览区">
+        <section class="preview-card card">
+          <div class="preview-toolbar">
+            <div>
+              <h2>实时预览</h2>
+              <p class="section-note">导出与预览使用同一张画布。</p>
+            </div>
+            <div class="button-row">
+              <select id="exportSize" class="button" aria-label="PNG 导出尺寸">
+                <option value="786x1704">786 × 1704</option>
+              </select>
+              <button id="exportPng" class="button primary" type="button">导出 PNG</button>
+            </div>
+          </div>
+          <div class="device-stage">
+            <canvas id="previewCanvas" width="786" height="1704" aria-label="iMessage 截图实时预览"></canvas>
+          </div>
+          <div class="preview-meta">
+            <span id="renderSize">786 × 1704 PNG</span>
+            <span id="overflowWarning" class="overflow-warning" role="status"></span>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const DESIGN_W = 390;
+      const DESIGN_H = 844;
+      const BASE_STORAGE_KEY = 'offline-imessage-shot-v1';
+      const DEFAULT_STATE = Object.freeze({
+        version: 1,
+        contactName: 'TJ',
+        avatarLetter: 'T',
+        network: '5G',
+        battery: 82,
+        timeSeparator: 'Today 7:14 PM',
+        messages: [
+          { sender: 'TJ', text: 'You said my comms encryption had twenty-three bugs.' },
+          { sender: 'B', text: 'Yes' },
+          { sender: 'B', text: 'T tried to fix some of them.' },
+          { sender: 'TJ', text: 'How many are left?' },
+          { sender: 'B', text: 'Fifty-five.' }
+        ]
+      });
+
+      const $ = (selector) => document.querySelector(selector);
+      const canvas = $('#previewCanvas');
+      const messagesList = $('#messagesList');
+      const overflowWarning = $('#overflowWarning');
+      const toastElement = $('#toast');
+      const referenceIcons = {
+        cellular: new Image(),
+        wifi: new Image(),
+        video: new Image(),
+        tailBlue: new Image(),
+        tailGray: new Image()
+      };
+      referenceIcons.cellular.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAdCAYAAADCdc79AAABp0lEQVR42s2Xv0oEMRDGf9m7wz+gqGhl4QuIYGkhgj6ErY1vYGFjb+ED2CjYWdnb29qKnaVeoXInqKdobGYlDMneJnu7OhCW3UxmvmS+zMwawMiwzlOL+93I06fn09ffCn20HAcoh3jmQs5j9AvXmIARM+QEUmUM2ADmgC/gCrj3OY8Z2ZD3onEpG83HC7CgdBqVngJk5cR+JWsYkO8EWrGATAVn0euyEgZtSWOpl8CGANmqxoADoCtkfQLOgHbdMQ/NTQHfHtIuOzp9z/xWDIdsRIimAzZmU0NGAp9GnjeygFGbyKHKtGgXFEGfrAC7wATwChwDNxUBJW+qAzwqQr4BMzK/GCD1+hBSb6Zm6o7jPJdxYH7UHCpD6jqLnikDyEbG2YyKQ22P4SXpW3rAQ8O3zWaKI9fAHXArjdN5gz2K1SFbA1aV0rZc8cbEBTRZ0Hb+CSBbIz+SAJmauoJkQF3P/IeUCCQLf3p03p2G3Zcunp33gWd9v2iXJ7Iod7CndI6kXORl41Cdzr5THgbAqUotOwLQym/Qhe6pm2jiK4fX/EG3+X/lB5XGcOe+UFEFAAAAAElFTkSuQmCC';
+      referenceIcons.wifi.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAbCAYAAAAULC3gAAACWElEQVR42q3WuWsVURQG8N9NxCWouIGiEQ0uIC7RCA8FQVsLtbfQVsQFwUZLCztBLPUvsNI/QSSgAU1jIWLlUqi8hAR3szwLrzAZZ+bOvOeBy8zj3XPuN9/5zrknoM8f6yDEZ9ZC5n8le/J7y6zojAW/+xMBQg5IFYBQArooRinwvhpflQ0aCr64irWsXxEzSYrzBxelrx/rsAV7MIiVce803uFFfE5gruS8jh5tL27jPX7EgFXrO97iJnbm0hVqZuafL1mEUxjHfA0QVWsUx2rodgHaLOp9eP0fgOTXGLY2YWcxbmCmwSEzmG24/2KKrRCrbjQRbB6PcAUtDGT8V+AIruNJFHRVrIdRFqUtYKzC+RXOYnVFT8m/b8AFvEmACmWlP4IvOYevOFdAb8CSyMogNsf3pQVgA67hZy72NIZSGjqMb9HhWTwsaxtxNVZeO5eWWXzCU5zH2hywIbyMeyewo66wD+B+Jr8Ba3CvoXhncSs2zr82gMd1wZTp4SQmeyj1No5mWkxfXRBFdrmiF81HHXzAR3xOsHWiCStlwFrxGsgL/Q52Z4S8LKZmJKb2V85nMgr/v1grMjGHu1hVI9Xr8SCyOIVdTe+vlI3gdA1G8+AuxUqtdaH2ing5DmI4pmUcz+M0kDqz0/SmT9mZqKVOQbM7XsFkqDM51pkEsrYpUVHtXO9RMA/VmhxDg/l5fwmoKWxLMFR7UAsNAR7KtYQ2ticY0c2kWJW+/J7hqJupzKhaNQF0NbpWjRZFlLcyU2DoQpON2GlSESEh4mSM/h7AplLTFUO/AcKLC7T2moJLAAAAAElFTkSuQmCC';
+      referenceIcons.video.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACwAAAAcCAYAAAAa/l2sAAABhElEQVR42u3XPUtcQRQG4Ee9gQRFQ7pIiKQRVgiCYiRgZ2XaCIKCpE6VMkXyG0zKgIU/wNLGJQQUIX5gqRG7FLYxRUDwg01zhcty7+7d3Tu7LOzbzZkzwzvvnHPmDD2ERV8OnweIcvreo4Ib3LaT8DI+YKzJvSs4xUcchiTcj+94WaAwm3gfH6IlDGRs/qrgm5yIw+NnTv/XeIOT6rCqVngMRw3GayMh8hR3NXweYRulxJoFHCevP4nPgcjei/OuxvyTOOZLVWu+VMdrEvOBq9Jchn0BZxhKmXuRHEQpCRcSgym2r3FFyoWog29AP7Yw08iiqIMP1m88bOaUnVRYNxHWI9wj3MWEK3geV4quUfgOs/jRCuFKYJJXKaSX8KlZwvuBCR9n2L9hKkOwi1rt5Tj2AraXz3Bdw+cxdjCasK2gnKXwOX4FUnejDln4i8m4DV2P+/NyvS9ShIM4i4vCLhaLyJG0KnGLaazhX4v7/8Eq3haV0HlidQTDTXzzLws4cA9tx3/iGD7624cwJgAAAABJRU5ErkJggg==';
+      referenceIcons.tailBlue.src = 'data:image/png;base64,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';
+      referenceIcons.tailGray.src = 'data:image/png;base64,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';
+      referenceIcons.cellular.addEventListener('load', queueRender);
+      referenceIcons.wifi.addEventListener('load', queueRender);
+      referenceIcons.video.addEventListener('load', queueRender);
+      referenceIcons.tailBlue.addEventListener('load', queueRender);
+      referenceIcons.tailGray.addEventListener('load', queueRender);
+      let toastTimer = 0;
+      let renderQueued = false;
+      let storageKey = BASE_STORAGE_KEY;
+
+      let state = loadAutosave() || clone(DEFAULT_STATE);
+
+      function clone(value) {
+        return JSON.parse(JSON.stringify(value));
+      }
+
+      function sanitizeState(value) {
+        if (!value || typeof value !== 'object') throw new Error('JSON 内容不是有效的对话配置。');
+        if (!Array.isArray(value.messages)) throw new Error('JSON 中缺少 messages 数组。');
+
+        return {
+          version: 1,
+          contactName: typeof value.contactName === 'string' ? value.contactName.slice(0, 36) : 'TJ',
+          avatarLetter: typeof value.avatarLetter === 'string' ? Array.from(value.avatarLetter).slice(0, 2).join('') : 'T',
+          network: value.network === 'wifi' ? 'wifi' : '5G',
+          battery: Math.max(1, Math.min(100, Number(value.battery) || 82)),
+          timeSeparator: typeof value.timeSeparator === 'string' ? value.timeSeparator.slice(0, 60) : 'Today 7:14 PM',
+          messages: value.messages.slice(0, 100).map((message) => ({
+            sender: message && message.sender === 'B' ? 'B' : 'TJ',
+            text: message && typeof message.text === 'string' ? message.text.slice(0, 5000) : ''
+          }))
+        };
+      }
+
+      function loadAutosave() {
+        try {
+          const raw = localStorage.getItem(storageKey);
+          return raw ? sanitizeState(JSON.parse(raw)) : null;
+        } catch (_) {
+          return null;
+        }
+      }
+
+      function autosave() {
+        try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch (_) { /* file URLs may restrict storage */ }
+      }
+
+      function syncTopFields() {
+        $('#contactName').value = state.contactName;
+        $('#avatarLetter').value = state.avatarLetter;
+        $('#networkType').value = state.network;
+        $('#batteryLevel').value = String(state.battery);
+        $('#batteryValue').value = `${state.battery}%`;
+        $('#timeSeparator').value = state.timeSeparator;
+      }
+
+      function renderMessageEditor() {
+        messagesList.replaceChildren();
+
+        state.messages.forEach((message, index) => {
+          const card = document.createElement('article');
+          card.className = `message-card ${message.sender === 'B' ? 'is-b' : 'is-tj'}`;
+          card.dataset.index = String(index);
+
+          const sender = document.createElement('select');
+          sender.className = 'sender-select';
+          sender.setAttribute('aria-label', `第 ${index + 1} 条消息的发送者`);
+          sender.innerHTML = '<option value="B">B</option><option value="TJ">TJ</option>';
+          sender.value = message.sender;
+          sender.addEventListener('change', () => {
+            state.messages[index].sender = sender.value === 'B' ? 'B' : 'TJ';
+            card.className = `message-card ${sender.value === 'B' ? 'is-b' : 'is-tj'}`;
+            changed();
+          });
+
+          const text = document.createElement('textarea');
+          text.className = 'message-text';
+          text.value = message.text;
+          text.placeholder = '输入消息文本';
+          text.maxLength = 5000;
+          text.setAttribute('aria-label', `第 ${index + 1} 条消息文本`);
+          text.addEventListener('input', () => {
+            state.messages[index].text = text.value;
+            changed();
+          });
+
+          const actions = document.createElement('div');
+          actions.className = 'message-actions';
+
+          const up = actionButton('↑', '上移', index === 0, () => moveMessage(index, -1));
+          const down = actionButton('↓', '下移', index === state.messages.length - 1, () => moveMessage(index, 1));
+          const remove = actionButton('删除', '删除', false, () => deleteMessage(index));
+          remove.classList.add('delete');
+          actions.append(up, down, remove);
+          card.append(sender, text, actions);
+          messagesList.append(card);
+        });
+      }
+
+      function actionButton(text, label, disabled, handler) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'icon-button';
+        button.textContent = text;
+        button.title = label;
+        button.setAttribute('aria-label', label);
+        button.disabled = disabled;
+        button.addEventListener('click', handler);
+        return button;
+      }
+
+      function moveMessage(index, delta) {
+        const destination = index + delta;
+        if (destination < 0 || destination >= state.messages.length) return;
+        const [item] = state.messages.splice(index, 1);
+        state.messages.splice(destination, 0, item);
+        renderMessageEditor();
+        changed();
+      }
+
+      function deleteMessage(index) {
+        state.messages.splice(index, 1);
+        renderMessageEditor();
+        changed();
+      }
+
+      function addMessage() {
+        const last = state.messages[state.messages.length - 1];
+        state.messages.push({ sender: !last || last.sender === 'B' ? 'TJ' : 'B', text: '' });
+        renderMessageEditor();
+        changed();
+        const newest = messagesList.lastElementChild;
+        newest?.querySelector('textarea')?.focus();
+        newest?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      function parseBulkConversation(showResult = true) {
+        const source = $('#bulkConversation').value.replace(/\r\n?/g, '\n');
+        const lines = source.split('\n');
+        const parsed = [];
+        let current = null;
+        let ignoredBeforeFirstMarker = 0;
+
+        for (const line of lines) {
+          const match = line.match(/^\s*(TJ|B)\s*[:：][ \t]?(.*)$/i);
+          if (match) {
+            current = { sender: match[1].toUpperCase() === 'B' ? 'B' : 'TJ', text: match[2] };
+            parsed.push(current);
+          } else if (current) {
+            current.text += `\n${line}`;
+          } else if (line.trim()) {
+            ignoredBeforeFirstMarker += 1;
+          }
+        }
+
+        if (!parsed.length) {
+          if (showResult) showToast('没有识别到消息，请让每条消息以 TJ: 或 B: 开头。');
+          return false;
+        }
+
+        state.messages = parsed;
+        renderMessageEditor();
+        changed();
+        if (showResult) {
+          showToast(ignoredBeforeFirstMarker
+            ? `已排版 ${parsed.length} 条消息；首个标记前的文字未导入。`
+            : `已识别并排版 ${parsed.length} 条消息。`);
+        }
+        return true;
+      }
+
+      function changed() {
+        autosave();
+        queueRender();
+      }
+
+      function queueRender() {
+        if (renderQueued) return;
+        renderQueued = true;
+        requestAnimationFrame(() => {
+          renderQueued = false;
+          renderPreview();
+        });
+      }
+
+      function roundedRectPath(ctx, x, y, width, height, radius) {
+        const r = Math.min(radius, width / 2, height / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + width - r, y);
+        ctx.arcTo(x + width, y, x + width, y + r, r);
+        ctx.lineTo(x + width, y + height - r);
+        ctx.arcTo(x + width, y + height, x + width - r, y + height, r);
+        ctx.lineTo(x + r, y + height);
+        ctx.arcTo(x, y + height, x, y + height - r, r);
+        ctx.lineTo(x, y + r);
+        ctx.arcTo(x, y, x + r, y, r);
+        ctx.closePath();
+      }
+
+      function fillRoundedRect(ctx, x, y, width, height, radius, color) {
+        roundedRectPath(ctx, x, y, width, height, radius);
+        ctx.fillStyle = color;
+        ctx.fill();
+      }
+
+      function strokeRoundedRect(ctx, x, y, width, height, radius, color, lineWidth = 1) {
+        roundedRectPath(ctx, x, y, width, height, radius);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = lineWidth;
+        ctx.stroke();
+      }
+
+      function setFont(ctx, weight, size) {
+        ctx.font = `${weight} ${size}px -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif`;
+      }
+
+      function setMessageFont(ctx, size) {
+        ctx.font = `300 ${size}px "Helvetica Neue", Arial, sans-serif`;
+      }
+
+      function graphemes(value) {
+        if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+          return Array.from(new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(value), (part) => part.segment);
+        }
+        return Array.from(value);
+      }
+
+      function wrapText(ctx, text, maxWidth) {
+        const lines = [];
+        const paragraphs = String(text).split('\n');
+
+        function appendOversizedToken(currentLine, token) {
+          let current = currentLine;
+          for (const char of graphemes(token)) {
+            if (current && ctx.measureText(current + char).width > maxWidth) {
+              lines.push(current);
+              current = char;
+            } else {
+              current += char;
+            }
+          }
+          return current;
+        }
+
+        paragraphs.forEach((paragraph) => {
+          if (paragraph === '') {
+            lines.push('');
+            return;
+          }
+
+          const tokens = paragraph.match(/\s+|[^\s]+/gu) || [''];
+          let line = '';
+          tokens.forEach((token) => {
+            const candidate = line + token;
+            if (ctx.measureText(candidate).width <= maxWidth) {
+              line = candidate;
+            } else if (ctx.measureText(token).width <= maxWidth) {
+              if (line) lines.push(line);
+              line = token;
+            } else {
+              line = appendOversizedToken(line, token);
+            }
+          });
+          lines.push(line);
+        });
+
+        return lines.length ? lines : [''];
+      }
+
+      function drawBattery(ctx, level) {
+        const label = String(Math.round(level));
+        const width = label.length === 3 ? 26 : 21;
+        const x = 358 - width;
+        const y = 24.2;
+        fillRoundedRect(ctx, x, y, width, 14, 4, level <= 20 ? '#d9343a' : '#050505');
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        setFont(ctx, 650, 9.5);
+        ctx.fillText(label, x + width / 2, y + 7.2);
+        fillRoundedRect(ctx, 359.3, y + 4.2, 2, 5.1, 1, '#9a9a9e');
+      }
+
+      function drawStatusBar(ctx) {
+        ctx.textBaseline = 'alphabetic';
+        setFont(ctx, 650, 15.5);
+        ctx.fillStyle = '#050505';
+        ctx.textAlign = 'left';
+        ctx.fillText('9:41', 58, 36);
+
+        if (referenceIcons.cellular.complete && referenceIcons.cellular.naturalWidth) {
+          ctx.drawImage(referenceIcons.cellular, 288.5, 23, 19.5, 16.3);
+        }
+        if (state.network === 'wifi') {
+          if (referenceIcons.wifi.complete && referenceIcons.wifi.naturalWidth) {
+            ctx.drawImage(referenceIcons.wifi, 313, 23.6, 19.5, 15.2);
+          }
+        } else {
+          setFont(ctx, 500, 13.5);
+          ctx.fillText('5G', 313, 35.5);
+        }
+        drawBattery(ctx, state.battery);
+      }
+
+      function drawFloatingCircle(ctx, x, y, radius) {
+        ctx.save();
+        ctx.shadowColor = 'rgba(22, 28, 36, .10)';
+        ctx.shadowBlur = 17;
+        ctx.shadowOffsetY = 5;
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawHeader(ctx) {
+        drawStatusBar(ctx);
+
+        drawFloatingCircle(ctx, 48, 82, 20.5);
+        ctx.strokeStyle = '#171719';
+        ctx.lineWidth = 2.1;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        ctx.moveTo(51.5, 74.5);
+        ctx.lineTo(44, 82);
+        ctx.lineTo(51.5, 89.5);
+        ctx.stroke();
+
+        ctx.save();
+        const avatarGradient = ctx.createLinearGradient(0, 58, 0, 118);
+        avatarGradient.addColorStop(0, '#a8c2e8');
+        avatarGradient.addColorStop(1, '#6f88bb');
+        ctx.shadowColor = 'rgba(45, 57, 78, .08)';
+        ctx.shadowBlur = 17;
+        ctx.shadowOffsetY = 5;
+        ctx.fillStyle = avatarGradient;
+        ctx.beginPath();
+        ctx.arc(195, 88, 28.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        setFont(ctx, 400, 21.5);
+        ctx.fillText(state.avatarLetter || '', 195, 88.5);
+        ctx.restore();
+
+        const displayName = state.contactName || '';
+        setFont(ctx, 600, 15.5);
+        const maxName = 106;
+        let name = displayName;
+        while (name && ctx.measureText(name).width > maxName) name = Array.from(name).slice(0, -1).join('');
+        if (name !== displayName && name) name = Array.from(name).slice(0, -1).join('') + '…';
+        const nameWidth = ctx.measureText(name).width;
+        const pillWidth = Math.min(142, Math.max(57, nameWidth + 24));
+        const pillX = 195 - pillWidth / 2;
+        ctx.save();
+        ctx.shadowColor = 'rgba(22, 28, 36, .105)';
+        ctx.shadowBlur = 18;
+        ctx.shadowOffsetY = 7;
+        fillRoundedRect(ctx, pillX, 116.5, pillWidth, 32, 16, '#fff');
+        ctx.restore();
+
+        ctx.fillStyle = '#111';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        setFont(ctx, 600, 15.5);
+        ctx.fillText(name, 191, 132.5);
+
+        ctx.strokeStyle = '#aaaeb4';
+        ctx.lineWidth = 1.8;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        ctx.moveTo(198 + nameWidth / 2, 128.5);
+        ctx.lineTo(201 + nameWidth / 2, 132.5);
+        ctx.lineTo(198 + nameWidth / 2, 136.5);
+        ctx.stroke();
+
+        drawFloatingCircle(ctx, 347, 82, 20.5);
+        if (referenceIcons.video.complete && referenceIcons.video.naturalWidth) {
+          ctx.drawImage(referenceIcons.video, 335, 74.4, 23.8, 15.2);
+        }
+      }
+
+      function drawSeparator(ctx) {
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#929296';
+        const value = state.timeSeparator || '';
+        const match = value.match(/^(\S+)(\s.*)?$/s);
+        const lead = match ? match[1] : value;
+        const rest = match && match[2] ? match[2] : '';
+        setFont(ctx, 600, 12);
+        const leadWidth = ctx.measureText(lead).width;
+        setFont(ctx, 400, 12);
+        const restWidth = ctx.measureText(rest).width;
+        let x = (DESIGN_W - leadWidth - restWidth) / 2;
+        ctx.textAlign = 'left';
+        setFont(ctx, 600, 12);
+        ctx.fillText(lead, x, 177.5);
+        x += leadWidth;
+        setFont(ctx, 400, 12);
+        ctx.fillText(rest, x, 177.5);
+      }
+
+      function measureMessage(ctx, message) {
+        setMessageFont(ctx, 15.8);
+        const lines = wrapText(ctx, message.text, 270);
+        const measured = Math.max(0, ...lines.map((line) => ctx.measureText(line).width));
+        const width = Math.min(300, Math.max(42, measured + 28));
+        const height = Math.max(42, lines.length * 21.5 + 20);
+        return { lines, width, height };
+      }
+
+      function drawBubble(ctx, message, x, y, width, height, lines) {
+        const mine = message.sender === 'B';
+        const fill = mine ? '#0A84FF' : '#E9E9ED';
+        const bubbleRadius = Math.min(21, height / 2);
+        fillRoundedRect(ctx, x, y, width, height, bubbleRadius, fill);
+
+        const tailImage = mine ? referenceIcons.tailBlue : referenceIcons.tailGray;
+        if (tailImage.complete && tailImage.naturalWidth) {
+          const tailX = mine ? x + width - 25.4 : x + 7.2;
+          ctx.drawImage(tailImage, tailX, y + height - 4, 18.2, 11);
+        }
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(x + 10, y + 6, width - 20, height - 12);
+        ctx.clip();
+        ctx.fillStyle = mine ? '#fff' : '#050505';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        setMessageFont(ctx, 15.8);
+        const textX = x + 14;
+        const textBlockHeight = (lines.length - 1) * 21.5 + 15.8;
+        const firstY = y + (height - textBlockHeight) / 2;
+        lines.forEach((line, lineIndex) => ctx.fillText(line, textX, firstY + lineIndex * 21.5));
+        ctx.restore();
+      }
+
+      function drawMessages(ctx) {
+        let y = 197;
+        const bottomLimit = 763;
+        let overflow = false;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(10, 190, 370, bottomLimit - 190);
+        ctx.clip();
+
+        state.messages.forEach((message, index) => {
+          const layout = measureMessage(ctx, message);
+          const mine = message.sender === 'B';
+          const x = mine ? DESIGN_W - 24 - layout.width : 28;
+          drawBubble(ctx, message, x, y, layout.width, layout.height, layout.lines);
+          const next = state.messages[index + 1];
+          const gap = next && next.sender === message.sender ? 13 : 15;
+          y += layout.height + gap;
+          if (y - gap + 12 > bottomLimit) overflow = true;
+        });
+        ctx.restore();
+        return overflow;
+      }
+
+      function drawComposer(ctx) {
+        const fade = ctx.createLinearGradient(0, 635, 0, 808);
+        fade.addColorStop(0, 'rgba(255,255,255,0)');
+        fade.addColorStop(.45, 'rgba(255,255,255,.76)');
+        fade.addColorStop(1, '#fff');
+        ctx.fillStyle = fade;
+        ctx.fillRect(0, 635, DESIGN_W, 209);
+
+        const ambientShadow = ctx.createRadialGradient(195, 794, 20, 195, 794, 190);
+        ambientShadow.addColorStop(0, 'rgba(132, 140, 151, .11)');
+        ambientShadow.addColorStop(.52, 'rgba(151, 158, 169, .055)');
+        ambientShadow.addColorStop(1, 'rgba(171, 177, 186, 0)');
+        ctx.fillStyle = ambientShadow;
+        ctx.fillRect(0, 650, DESIGN_W, 194);
+
+        ctx.save();
+        ctx.shadowColor = 'rgba(22, 28, 36, .16)';
+        ctx.shadowBlur = 28;
+        ctx.shadowOffsetY = 7;
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(48, 793.5, 20.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        ctx.strokeStyle = '#09090a';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(48, 785.5);
+        ctx.lineTo(48, 801.5);
+        ctx.moveTo(40, 793.5);
+        ctx.lineTo(56, 793.5);
+        ctx.stroke();
+
+        ctx.save();
+        ctx.shadowColor = 'rgba(22, 28, 36, .16)';
+        ctx.shadowBlur = 30;
+        ctx.shadowOffsetY = 8;
+        fillRoundedRect(ctx, 80, 773, 282, 41, 20.5, '#fff');
+        ctx.restore();
+        strokeRoundedRect(ctx, 80, 773, 282, 41, 20.5, '#f1f1f3', .6);
+
+        ctx.fillStyle = '#c2c3c8';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.font = '300 16px "Helvetica Neue", Arial, sans-serif';
+        ctx.fillText('iMessage', 99, 793.5);
+
+        ctx.strokeStyle = '#85898f';
+        ctx.lineWidth = 1.2;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(338, 789.5);
+        ctx.lineTo(338, 794.5);
+        ctx.quadraticCurveTo(338, 796.5, 340, 796.5);
+        ctx.quadraticCurveTo(342, 796.5, 342, 794.5);
+        ctx.lineTo(342, 789.5);
+        ctx.quadraticCurveTo(342, 787.5, 340, 787.5);
+        ctx.quadraticCurveTo(338, 787.5, 338, 789.5);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(336, 794);
+        ctx.quadraticCurveTo(336, 800, 340, 800);
+        ctx.quadraticCurveTo(344, 800, 344, 794);
+        ctx.moveTo(340, 800);
+        ctx.lineTo(340, 802.5);
+        ctx.moveTo(338, 802.5);
+        ctx.lineTo(342, 802.5);
+        ctx.stroke();
+      }
+
+      function renderToCanvas(targetCanvas, pixelWidth, pixelHeight) {
+        targetCanvas.width = pixelWidth;
+        targetCanvas.height = pixelHeight;
+        const ctx = targetCanvas.getContext('2d', { alpha: false });
+        ctx.setTransform(pixelWidth / DESIGN_W, 0, 0, pixelHeight / DESIGN_H, 0, 0);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, DESIGN_W, DESIGN_H);
+        drawHeader(ctx);
+        drawSeparator(ctx);
+        const overflow = drawMessages(ctx);
+        drawComposer(ctx);
+        return overflow;
+      }
+
+      function selectedSize() {
+        const [width, height] = $('#exportSize').value.split('x').map(Number);
+        return { width, height };
+      }
+
+      function renderPreview() {
+        const { width, height } = selectedSize();
+        const overflow = renderToCanvas(canvas, width, height);
+        $('#renderSize').textContent = `${width} × ${height} PNG`;
+        overflowWarning.textContent = overflow ? '消息超出可见区域，请减少内容' : '';
+      }
+
+      function downloadBlob(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = filename;
+        document.body.append(anchor);
+        anchor.click();
+        anchor.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+
+      function safeFilename(value) {
+        const cleaned = String(value).replace(/[\\/:*?"<>|]+/g, '-').trim();
+        return cleaned || 'iMessage';
+      }
+
+      function exportPng() {
+        renderPreview();
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            showToast('PNG 生成失败，请换用最新版浏览器重试。');
+            return;
+          }
+          downloadBlob(blob, `${safeFilename(state.contactName)}-iMessage.png`);
+          showToast('PNG 已导出。');
+        }, 'image/png');
+      }
+
+      function saveJson() {
+        const json = JSON.stringify(state, null, 2);
+        downloadBlob(new Blob([json], { type: 'application/json;charset=utf-8' }), `${safeFilename(state.contactName)}-conversation.json`);
+        showToast('对话 JSON 已保存。');
+      }
+
+      async function loadJsonFile(file) {
+        try {
+          const imported = sanitizeState(JSON.parse(await file.text()));
+          state = imported;
+          syncTopFields();
+          renderMessageEditor();
+          changed();
+          showToast('JSON 已恢复。');
+        } catch (error) {
+          showToast(error instanceof Error ? error.message : '无法读取这个 JSON 文件。');
+        } finally {
+          $('#jsonFile').value = '';
+        }
+      }
+
+      function encodeState(value) {
+        const bytes = new TextEncoder().encode(JSON.stringify(value));
+        let binary = '';
+        bytes.forEach((byte) => { binary += String.fromCharCode(byte); });
+        return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+      }
+
+      function decodeState(encoded) {
+        const base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+        const padded = base64 + '='.repeat((4 - base64.length % 4) % 4);
+        const binary = atob(padded);
+        const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+        return JSON.parse(new TextDecoder().decode(bytes));
+      }
+
+      function shortHash(value) {
+        let hash = 2166136261;
+        for (let index = 0; index < value.length; index += 1) {
+          hash ^= value.charCodeAt(index);
+          hash = Math.imul(hash, 16777619);
+        }
+        return (hash >>> 0).toString(36);
+      }
+
+      function importFromHash() {
+        const match = location.hash.match(/^#conversation=([A-Za-z0-9_-]+)$/);
+        if (!match) return false;
+        try {
+          storageKey = `${BASE_STORAGE_KEY}-copy-${shortHash(match[1])}`;
+          const savedCopy = loadAutosave();
+          state = savedCopy || sanitizeState(decodeState(match[1]));
+          return true;
+        } catch (_) {
+          showToast('链接中的对话副本无法读取。');
+          return false;
+        }
+      }
+
+      function duplicatePage() {
+        const baseUrl = location.href.split('#')[0];
+        const duplicateUrl = `${baseUrl}#conversation=${encodeState(state)}`;
+        const newWindow = window.open(duplicateUrl, '_blank');
+        if (newWindow) {
+          newWindow.opener = null;
+          showToast('当前对话已复制到新标签页。');
+        } else {
+          showToast('浏览器阻止了新标签页，请允许此页面打开弹窗。');
+        }
+      }
+
+      function showToast(message) {
+        clearTimeout(toastTimer);
+        toastElement.textContent = message;
+        toastElement.classList.add('show');
+        toastTimer = window.setTimeout(() => toastElement.classList.remove('show'), 2600);
+      }
+
+      $('#contactName').addEventListener('input', (event) => { state.contactName = event.target.value; changed(); });
+      $('#avatarLetter').addEventListener('input', (event) => {
+        const limited = Array.from(event.target.value).slice(0, 2).join('');
+        if (event.target.value !== limited) event.target.value = limited;
+        state.avatarLetter = limited;
+        changed();
+      });
+      $('#networkType').addEventListener('change', (event) => { state.network = event.target.value === 'wifi' ? 'wifi' : '5G'; changed(); });
+      $('#batteryLevel').addEventListener('input', (event) => {
+        state.battery = Number(event.target.value);
+        $('#batteryValue').value = `${state.battery}%`;
+        changed();
+      });
+      $('#timeSeparator').addEventListener('input', (event) => { state.timeSeparator = event.target.value; changed(); });
+      $('#exportSize').addEventListener('change', renderPreview);
+      $('#addMessage').addEventListener('click', addMessage);
+      $('#parseConversation').addEventListener('click', () => parseBulkConversation(true));
+      $('#bulkConversation').addEventListener('paste', () => {
+        setTimeout(() => parseBulkConversation(true), 0);
+      });
+      $('#exportPng').addEventListener('click', exportPng);
+      $('#saveJson').addEventListener('click', saveJson);
+      $('#loadJson').addEventListener('click', () => $('#jsonFile').click());
+      $('#jsonFile').addEventListener('change', (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (file) loadJsonFile(file);
+      });
+      $('#duplicatePage').addEventListener('click', duplicatePage);
+
+      importFromHash();
+      syncTopFields();
+      renderMessageEditor();
+      renderPreview();
+      autosave();
+    })();
+  </script>
+</body>
+</html>
