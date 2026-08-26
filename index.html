@@ -1056,7 +1056,7 @@
         return overflow;
       }
 
-      function drawComposer(ctx) {
+      function drawComposerBackdrop(ctx) {
         const fade = ctx.createLinearGradient(0, 635, 0, 808);
         fade.addColorStop(0, 'rgba(255,255,255,0)');
         fade.addColorStop(.45, 'rgba(255,255,255,.76)');
@@ -1070,7 +1070,9 @@
         ambientShadow.addColorStop(1, 'rgba(171, 177, 186, 0)');
         ctx.fillStyle = ambientShadow;
         ctx.fillRect(0, 650, DESIGN_W, 194);
+      }
 
+      function drawComposer(ctx) {
         ctx.save();
         ctx.shadowColor = 'rgba(22, 28, 36, .16)';
         ctx.shadowBlur = 28;
@@ -1139,6 +1141,7 @@
         ctx.fillRect(0, 0, DESIGN_W, DESIGN_H);
         drawHeader(ctx);
         drawSeparator(ctx);
+        drawComposerBackdrop(ctx);
         const overflow = drawMessages(ctx);
         drawComposer(ctx);
         return overflow;
