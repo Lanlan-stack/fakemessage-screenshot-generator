@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>iMessage 截图生成器</title>
+  <title>Fake Message截图生成器</title>
   <style>
     :root {
       color-scheme: light;
@@ -158,9 +158,22 @@
       gap: 14px;
     }
 
+    .top-info-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .top-info-grid .contact-name-field { grid-column: 1 / 2; }
+    .top-info-grid .avatar-field { grid-column: 2 / -1; }
+    .message-settings { margin-bottom: 14px; }
+    .message-buttons { margin-bottom: 16px; }
+
     .field { display: grid; gap: 7px; }
 
     .field.wide { grid-column: 1 / -1; }
+
+    .field-example {
+      margin: 0;
+      color: #9aa2ad;
+      font-size: 12px;
+      line-height: 1.45;
+    }
 
     label, .field-label {
       color: #4d5866;
@@ -207,6 +220,24 @@
       min-height: 42px;
     }
 
+    .avatar-upload-row {
+      display: flex;
+      min-height: 42px;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .avatar-status {
+      min-width: 120px;
+      flex: 1;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 12px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     input[type="range"] { width: 100%; accent-color: var(--blue); }
 
     .battery-value {
@@ -232,10 +263,26 @@
 
     .message-card.is-b { border-left: 4px solid #0b84f3; }
     .message-card.is-tj { border-left: 4px solid #b6bcc5; }
+    .message-card.is-time { border-left: 4px solid #8f969f; background: #f5f7f9; }
 
     .sender-select { height: 38px; padding: 0 9px; background: #fff; }
 
+    .entry-kind {
+      display: flex;
+      height: 38px;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #d7dee7;
+      border-radius: 10px;
+      color: #626c79;
+      background: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
     .message-text { min-height: 66px; background: #fff; }
+    input.time-separator-text { height: 38px; min-height: 38px; background: #fff; }
 
     .message-actions {
       display: grid;
@@ -277,6 +324,8 @@
     }
 
     .button:hover { border-color: #aeb9c7; background: #f7f9fb; }
+    .button:disabled { cursor: default; opacity: .45; }
+    label.button { cursor: pointer; }
 
     .button.primary {
       border-color: var(--blue);
@@ -288,6 +337,13 @@
     .button.primary:hover { border-color: var(--blue-dark); background: var(--blue-dark); }
 
     .button.soft-blue { border-color: #bddcf8; color: #066dce; background: #edf7ff; }
+
+    .button[aria-pressed="true"] {
+      border-color: #9acdf7;
+      color: #066dce;
+      background: #e5f3ff;
+      box-shadow: inset 0 0 0 1px rgba(10, 132, 255, .08);
+    }
 
     .button-row { display: flex; flex-wrap: wrap; gap: 9px; }
 
@@ -398,6 +454,8 @@
       .section, .preview-card { padding: 16px; }
       .fields { grid-template-columns: 1fr; }
       .field.wide { grid-column: auto; }
+      .top-info-grid .contact-name-field,
+      .top-info-grid .avatar-field { grid-column: auto; }
       .message-card { grid-template-columns: 72px minmax(0, 1fr); }
       .message-actions { grid-column: 1 / -1; display: flex; }
       .icon-button.delete { width: 30px; }
@@ -416,7 +474,7 @@
     <header class="app-header">
       <div>
         <p class="eyebrow">Offline screenshot studio</p>
-        <h1>iMessage 截图生成器</h1>
+        <h1>Fake Message截图生成器</h1>
         <p class="subtitle">编辑内容、实时预览，再直接导出高清 PNG。所有数据只在当前浏览器中处理，不上传网络，也不需要安装任何依赖。</p>
       </div>
       <span class="offline-badge">单文件 · 完全离线</span>
@@ -444,17 +502,13 @@
           <div class="section-heading">
             <div>
               <h2>顶部信息</h2>
-              <p class="section-note">状态栏时间固定为 9:41。</p>
+              <p class="section-note">状态栏时间、联系人和网络信息均可编辑。</p>
             </div>
           </div>
-          <div class="fields">
+          <div class="fields top-info-grid">
             <div class="field">
-              <label for="contactName">联系人名称</label>
-              <input id="contactName" type="text" maxlength="36" autocomplete="off" value="TJ">
-            </div>
-            <div class="field">
-              <label for="avatarLetter">头像字母</label>
-              <input id="avatarLetter" type="text" maxlength="2" autocomplete="off" value="T">
+              <label for="statusTime">状态栏时间</label>
+              <input id="statusTime" type="text" maxlength="8" autocomplete="off" value="9:41" placeholder="9:41">
             </div>
             <div class="field">
               <label for="networkType">网络显示</label>
@@ -470,9 +524,18 @@
                 <output id="batteryValue" class="battery-value" for="batteryLevel">82%</output>
               </div>
             </div>
-            <div class="field wide">
-              <label for="timeSeparator">唯一时间分隔</label>
-              <input id="timeSeparator" type="text" maxlength="60" autocomplete="off" value="Today 7:14 PM">
+            <div class="field contact-name-field">
+              <label for="contactName">联系人名称</label>
+              <input id="contactName" type="text" maxlength="36" autocomplete="off" value="TJ">
+            </div>
+            <div class="field avatar-field">
+              <span class="field-label">联系人头像</span>
+              <div class="avatar-upload-row">
+                <label class="button soft-blue" for="avatarFile">选择图片</label>
+                <input id="avatarFile" class="sr-only" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+                <button id="removeAvatar" class="button" type="button">移除头像</button>
+                <span id="avatarStatus" class="avatar-status">未上传，显示联系人首字母</span>
+              </div>
             </div>
           </div>
         </div>
@@ -483,7 +546,30 @@
               <h2>消息</h2>
               <p class="section-note">B = 右侧蓝色；TJ = 左侧灰色。文本会原样显示。</p>
             </div>
+          </div>
+          <div class="fields message-settings">
+            <div class="field wide">
+              <label for="timeSeparator">顶部时间分隔</label>
+              <input id="timeSeparator" type="text" maxlength="60" autocomplete="off" value="Today 5:13 AM" placeholder="Today 5:13 AM">
+              <p class="field-example">Today 5:13 AM / Yesterday 11:42 PM / Sun, Apr 5 at 12:11 AM</p>
+            </div>
+            <div class="field wide">
+              <label for="composerText">未发送信息内容</label>
+              <textarea id="composerText" maxlength="500" spellcheck="false" placeholder="留空时为默认"></textarea>
+            </div>
+            <div class="field">
+              <label for="deliveryStatus">最后一条蓝色消息状态</label>
+              <select id="deliveryStatus">
+                <option value="none">不显示</option>
+                <option value="read">Read</option>
+                <option value="delivered">Delivered</option>
+              </select>
+            </div>
+          </div>
+          <div class="button-row message-buttons">
             <button id="addMessage" class="button soft-blue" type="button">＋ 添加消息</button>
+            <button id="addTimeSeparator" class="button" type="button">＋ 插入时间分隔</button>
+            <button id="toggleTypingIndicator" class="button" type="button" aria-pressed="false">对方正在输入提示</button>
           </div>
           <div id="messagesList" class="messages-list"></div>
         </div>
@@ -555,18 +641,23 @@
       const DESIGN_H = 844;
       const BASE_STORAGE_KEY = 'offline-imessage-shot-v1';
       const DEFAULT_STATE = Object.freeze({
-        version: 1,
+        version: 2,
         contactName: 'TJ',
-        avatarLetter: 'T',
+        statusTime: '9:41',
+        avatarImage: '',
+        avatarFileName: '',
         network: '5G',
         battery: 82,
-        timeSeparator: 'Today 7:14 PM',
+        timeSeparator: 'Today 5:13 AM',
+        composerText: '',
+        deliveryStatus: 'none',
+        typingIndicator: false,
         messages: [
-          { sender: 'TJ', text: 'You said my comms encryption had twenty-three bugs.' },
-          { sender: 'B', text: 'Yes' },
-          { sender: 'B', text: 'T tried to fix some of them.' },
-          { sender: 'TJ', text: 'How many are left?' },
-          { sender: 'B', text: 'Fifty-five.' }
+          { type: 'message', sender: 'TJ', text: 'You said my comms encryption had twenty-three bugs.' },
+          { type: 'message', sender: 'B', text: 'Yes' },
+          { type: 'message', sender: 'B', text: 'T tried to fix some of them.' },
+          { type: 'message', sender: 'TJ', text: 'How many are left?' },
+          { type: 'message', sender: 'B', text: 'Fifty-five.' }
         ]
       });
 
@@ -592,6 +683,17 @@
       referenceIcons.video.addEventListener('load', queueRender);
       referenceIcons.tailBlue.addEventListener('load', queueRender);
       referenceIcons.tailGray.addEventListener('load', queueRender);
+      const uploadedAvatar = new Image();
+      let uploadedAvatarSource = '';
+      uploadedAvatar.addEventListener('load', queueRender);
+      uploadedAvatar.addEventListener('error', () => {
+        if (!state.avatarImage) return;
+        state.avatarImage = '';
+        state.avatarFileName = '';
+        syncAvatarImage();
+        changed();
+        showToast('头像图片无法读取，已恢复为首字母。');
+      });
       let toastTimer = 0;
       let renderQueued = false;
       let storageKey = BASE_STORAGE_KEY;
@@ -607,16 +709,24 @@
         if (!Array.isArray(value.messages)) throw new Error('JSON 中缺少 messages 数组。');
 
         return {
-          version: 1,
+          version: 2,
           contactName: typeof value.contactName === 'string' ? value.contactName.slice(0, 36) : 'TJ',
-          avatarLetter: typeof value.avatarLetter === 'string' ? Array.from(value.avatarLetter).slice(0, 2).join('') : 'T',
+          statusTime: typeof value.statusTime === 'string' ? value.statusTime.slice(0, 8) : '9:41',
+          avatarImage: typeof value.avatarImage === 'string' && /^data:image\/(?:jpeg|png|webp);base64,/i.test(value.avatarImage) && value.avatarImage.length <= 1500000 ? value.avatarImage : '',
+          avatarFileName: typeof value.avatarFileName === 'string' ? value.avatarFileName.slice(0, 120) : '',
           network: value.network === 'wifi' ? 'wifi' : '5G',
           battery: Math.max(1, Math.min(100, Number(value.battery) || 82)),
-          timeSeparator: typeof value.timeSeparator === 'string' ? value.timeSeparator.slice(0, 60) : 'Today 7:14 PM',
-          messages: value.messages.slice(0, 100).map((message) => ({
-            sender: message && message.sender === 'B' ? 'B' : 'TJ',
-            text: message && typeof message.text === 'string' ? message.text.slice(0, 5000) : ''
-          }))
+          timeSeparator: typeof value.timeSeparator === 'string' && value.timeSeparator.trim() ? value.timeSeparator.slice(0, 60) : 'Today 5:13 AM',
+          composerText: typeof value.composerText === 'string' ? value.composerText.slice(0, 500) : '',
+          deliveryStatus: value.deliveryStatus === 'read' || value.deliveryStatus === 'delivered' ? value.deliveryStatus : 'none',
+          typingIndicator: value.typingIndicator === true,
+          messages: value.messages.slice(0, 100).map((item) => item && item.type === 'separator'
+            ? { type: 'separator', text: typeof item.text === 'string' ? item.text.replace(/\r?\n/g, ' ').slice(0, 120) : '' }
+            : {
+                type: 'message',
+                sender: item && item.sender === 'B' ? 'B' : 'TJ',
+                text: item && typeof item.text === 'string' ? item.text.slice(0, 5000) : ''
+              })
         };
       }
 
@@ -635,38 +745,69 @@
 
       function syncTopFields() {
         $('#contactName').value = state.contactName;
-        $('#avatarLetter').value = state.avatarLetter;
+        $('#statusTime').value = state.statusTime;
+        $('#avatarFile').value = '';
+        syncAvatarImage();
         $('#networkType').value = state.network;
         $('#batteryLevel').value = String(state.battery);
         $('#batteryValue').value = `${state.battery}%`;
         $('#timeSeparator').value = state.timeSeparator;
+        $('#composerText').value = state.composerText;
+        $('#deliveryStatus').value = state.deliveryStatus;
+        syncTypingIndicatorButton();
+      }
+
+      function syncTypingIndicatorButton() {
+        const button = $('#toggleTypingIndicator');
+        button.setAttribute('aria-pressed', String(state.typingIndicator));
+        button.title = state.typingIndicator ? '点击隐藏对方正在输入提示' : '点击显示对方正在输入提示';
+      }
+
+      function syncAvatarImage() {
+        const source = state.avatarImage || '';
+        $('#avatarStatus').textContent = source ? (state.avatarFileName || '已上传头像') : '未上传，显示联系人首字母';
+        $('#removeAvatar').disabled = !source;
+        if (source === uploadedAvatarSource) return;
+        uploadedAvatarSource = source;
+        if (source) uploadedAvatar.src = source;
+        else uploadedAvatar.removeAttribute('src');
       }
 
       function renderMessageEditor() {
         messagesList.replaceChildren();
 
-        state.messages.forEach((message, index) => {
+        state.messages.forEach((item, index) => {
+          const isSeparator = item.type === 'separator';
           const card = document.createElement('article');
-          card.className = `message-card ${message.sender === 'B' ? 'is-b' : 'is-tj'}`;
+          card.className = `message-card ${isSeparator ? 'is-time' : item.sender === 'B' ? 'is-b' : 'is-tj'}`;
           card.dataset.index = String(index);
 
-          const sender = document.createElement('select');
-          sender.className = 'sender-select';
-          sender.setAttribute('aria-label', `第 ${index + 1} 条消息的发送者`);
-          sender.innerHTML = '<option value="B">B</option><option value="TJ">TJ</option>';
-          sender.value = message.sender;
-          sender.addEventListener('change', () => {
-            state.messages[index].sender = sender.value === 'B' ? 'B' : 'TJ';
-            card.className = `message-card ${sender.value === 'B' ? 'is-b' : 'is-tj'}`;
-            changed();
-          });
+          let leadingControl;
+          if (isSeparator) {
+            leadingControl = document.createElement('div');
+            leadingControl.className = 'entry-kind';
+            leadingControl.textContent = 'Time';
+          } else {
+            const sender = document.createElement('select');
+            sender.className = 'sender-select';
+            sender.setAttribute('aria-label', `第 ${index + 1} 条消息的发送者`);
+            sender.innerHTML = '<option value="B">B</option><option value="TJ">TJ</option>';
+            sender.value = item.sender;
+            sender.addEventListener('change', () => {
+              state.messages[index].sender = sender.value === 'B' ? 'B' : 'TJ';
+              card.className = `message-card ${sender.value === 'B' ? 'is-b' : 'is-tj'}`;
+              changed();
+            });
+            leadingControl = sender;
+          }
 
-          const text = document.createElement('textarea');
-          text.className = 'message-text';
-          text.value = message.text;
-          text.placeholder = '输入消息文本';
-          text.maxLength = 5000;
-          text.setAttribute('aria-label', `第 ${index + 1} 条消息文本`);
+          const text = document.createElement(isSeparator ? 'input' : 'textarea');
+          if (isSeparator) text.type = 'text';
+          text.className = `message-text${isSeparator ? ' time-separator-text' : ''}`;
+          text.value = item.text;
+          text.placeholder = isSeparator ? 'Today 11:42 PM' : '输入消息文本';
+          text.maxLength = isSeparator ? 120 : 5000;
+          text.setAttribute('aria-label', `第 ${index + 1} 条${isSeparator ? '时间分隔' : '消息'}文本`);
           text.addEventListener('input', () => {
             state.messages[index].text = text.value;
             changed();
@@ -680,7 +821,7 @@
           const remove = actionButton('删除', '删除', false, () => deleteMessage(index));
           remove.classList.add('delete');
           actions.append(up, down, remove);
-          card.append(sender, text, actions);
+          card.append(leadingControl, text, actions);
           messagesList.append(card);
         });
       }
@@ -713,13 +854,28 @@
       }
 
       function addMessage() {
-        const last = state.messages[state.messages.length - 1];
-        state.messages.push({ sender: !last || last.sender === 'B' ? 'TJ' : 'B', text: '' });
+        const last = state.messages.slice().reverse().find((item) => item.type !== 'separator');
+        state.messages.push({ type: 'message', sender: !last || last.sender === 'B' ? 'TJ' : 'B', text: '' });
         renderMessageEditor();
         changed();
         const newest = messagesList.lastElementChild;
         newest?.querySelector('textarea')?.focus();
         newest?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      function addTimeSeparator() {
+        state.messages.push({ type: 'separator', text: 'Today 11:42 PM' });
+        renderMessageEditor();
+        changed();
+        const newest = messagesList.lastElementChild;
+        newest?.querySelector('input')?.focus();
+        newest?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      function toggleTypingIndicator() {
+        state.typingIndicator = !state.typingIndicator;
+        syncTypingIndicatorButton();
+        changed();
       }
 
       function parseBulkConversation(showResult = true) {
@@ -732,7 +888,7 @@
         for (const line of lines) {
           const match = line.match(/^\s*(TJ|B)\s*[:：][ \t]?(.*)$/i);
           if (match) {
-            current = { sender: match[1].toUpperCase() === 'B' ? 'B' : 'TJ', text: match[2] };
+            current = { type: 'message', sender: match[1].toUpperCase() === 'B' ? 'B' : 'TJ', text: match[2] };
             parsed.push(current);
           } else if (current) {
             current.text += `\n${line}`;
@@ -801,10 +957,12 @@
 
       function setFont(ctx, weight, size) {
         ctx.font = `${weight} ${size}px -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif`;
+        ctx.letterSpacing = '0px';
       }
 
       function setMessageFont(ctx, size) {
         ctx.font = `300 ${size}px "Helvetica Neue", Arial, sans-serif`;
+        ctx.letterSpacing = '0.21px';
       }
 
       function graphemes(value) {
@@ -875,7 +1033,7 @@
         setFont(ctx, 650, 15.5);
         ctx.fillStyle = '#050505';
         ctx.textAlign = 'left';
-        ctx.fillText('9:41', 58, 36);
+        ctx.fillText(state.statusTime || '', 58, 36);
 
         if (referenceIcons.cellular.complete && referenceIcons.cellular.naturalWidth) {
           ctx.drawImage(referenceIcons.cellular, 288.5, 23, 19.5, 16.3);
@@ -905,6 +1063,7 @@
 
       function drawHeader(ctx) {
         drawStatusBar(ctx);
+        const displayName = state.contactName || '';
 
         drawFloatingCircle(ctx, 48, 82, 20.5);
         ctx.strokeStyle = '#171719';
@@ -921,24 +1080,35 @@
         const avatarGradient = ctx.createLinearGradient(0, 58, 0, 118);
         avatarGradient.addColorStop(0, '#a8c2e8');
         avatarGradient.addColorStop(1, '#6f88bb');
+        const hasUploadedAvatar = Boolean(state.avatarImage && uploadedAvatar.complete && uploadedAvatar.naturalWidth);
         ctx.shadowColor = 'rgba(45, 57, 78, .08)';
         ctx.shadowBlur = 17;
         ctx.shadowOffsetY = 5;
-        ctx.fillStyle = avatarGradient;
+        ctx.fillStyle = hasUploadedAvatar ? '#fff' : avatarGradient;
         ctx.beginPath();
         ctx.arc(195, 88, 28.5, 0, Math.PI * 2);
         ctx.fill();
         ctx.shadowColor = 'transparent';
         ctx.shadowBlur = 0;
         ctx.shadowOffsetY = 0;
-        ctx.fillStyle = '#fff';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        setFont(ctx, 400, 21.5);
-        ctx.fillText(state.avatarLetter || '', 195, 88.5);
+        if (hasUploadedAvatar) {
+          const sourceSize = Math.min(uploadedAvatar.naturalWidth, uploadedAvatar.naturalHeight);
+          const sourceX = (uploadedAvatar.naturalWidth - sourceSize) / 2;
+          const sourceY = (uploadedAvatar.naturalHeight - sourceSize) / 2;
+          ctx.beginPath();
+          ctx.arc(195, 88, 28.5, 0, Math.PI * 2);
+          ctx.clip();
+          ctx.drawImage(uploadedAvatar, sourceX, sourceY, sourceSize, sourceSize, 166.5, 59.5, 57, 57);
+        } else {
+          const initial = Array.from(displayName.trim())[0] || '';
+          ctx.fillStyle = '#fff';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          setFont(ctx, 400, 21.5);
+          ctx.fillText(initial.toLocaleUpperCase(), 195, 88.5);
+        }
         ctx.restore();
 
-        const displayName = state.contactName || '';
         setFont(ctx, 600, 15.5);
         const maxName = 106;
         let name = displayName;
@@ -977,12 +1147,16 @@
       }
 
       function drawSeparator(ctx) {
+        drawSeparatorText(ctx, state.timeSeparator || '', 177.5);
+      }
+
+      function drawSeparatorText(ctx, value, y) {
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#929296';
-        const value = state.timeSeparator || '';
-        const match = value.match(/^(\S+)(\s.*)?$/s);
-        const lead = match ? match[1] : value;
-        const rest = match && match[2] ? match[2] : '';
+        const dated = value.match(/^(.+?)(\s+at\s+.*)$/i);
+        const relative = value.match(/^(\S+)(\s.*)?$/s);
+        const lead = dated ? dated[1] : relative ? relative[1] : value;
+        const rest = dated ? dated[2] : relative && relative[2] ? relative[2] : '';
         setFont(ctx, 600, 12);
         const leadWidth = ctx.measureText(lead).width;
         setFont(ctx, 400, 12);
@@ -990,10 +1164,10 @@
         let x = (DESIGN_W - leadWidth - restWidth) / 2;
         ctx.textAlign = 'left';
         setFont(ctx, 600, 12);
-        ctx.fillText(lead, x, 177.5);
+        ctx.fillText(lead, x, y);
         x += leadWidth;
         setFont(ctx, 400, 12);
-        ctx.fillText(rest, x, 177.5);
+        ctx.fillText(rest, x, y);
       }
 
       function measureMessage(ctx, message) {
@@ -1032,26 +1206,79 @@
         ctx.restore();
       }
 
-      function drawMessages(ctx) {
+      function drawTypingIndicator(ctx, y) {
+        const x = 28;
+        const width = 70;
+        const height = 32;
+        fillRoundedRect(ctx, x, y, width, height, height / 2, '#E9E9ED');
+
+        ctx.fillStyle = '#B9BBC1';
+        [49, 63, 77].forEach((dotX) => {
+          ctx.beginPath();
+          ctx.arc(dotX, y + height / 2, 3.8, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        return height;
+      }
+
+      function drawDeliveryStatus(ctx, status, y) {
+        const label = status === 'read' ? 'Read' : 'Delivered';
+        ctx.save();
+        ctx.fillStyle = '#8E8E93';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'top';
+        setMessageFont(ctx, 10.8);
+        ctx.translate(0, y);
+        ctx.scale(1, .95);
+        ctx.fillText(label, DESIGN_W - 46, 0);
+        ctx.restore();
+      }
+
+      function drawMessages(ctx, bottomLimit = 763) {
         let y = 197;
-        const bottomLimit = 763;
         let overflow = false;
+        let lastBlueIndex = -1;
+
+        state.messages.forEach((item, index) => {
+          if (item.type === 'message' && item.sender === 'B') lastBlueIndex = index;
+        });
 
         ctx.save();
         ctx.beginPath();
         ctx.rect(10, 190, 370, bottomLimit - 190);
         ctx.clip();
 
-        state.messages.forEach((message, index) => {
-          const layout = measureMessage(ctx, message);
-          const mine = message.sender === 'B';
-          const x = mine ? DESIGN_W - 24 - layout.width : 28;
-          drawBubble(ctx, message, x, y, layout.width, layout.height, layout.lines);
+        state.messages.forEach((item, index) => {
           const next = state.messages[index + 1];
-          const gap = next && next.sender === message.sender ? 13 : 15;
-          y += layout.height + gap;
+          let height;
+          let gap = 15;
+
+          if (item.type === 'separator') {
+            height = 30;
+            drawSeparatorText(ctx, item.text, y + height / 2);
+          } else {
+            const layout = measureMessage(ctx, item);
+            const mine = item.sender === 'B';
+            const x = mine ? DESIGN_W - 24 - layout.width : 28;
+            drawBubble(ctx, item, x, y, layout.width, layout.height, layout.lines);
+            height = layout.height;
+            if (index === lastBlueIndex && state.deliveryStatus !== 'none') {
+              drawDeliveryStatus(ctx, state.deliveryStatus, y + layout.height + 8);
+              height += 27;
+            }
+            if (next && next.type !== 'separator' && next.sender === item.sender) gap = 13;
+          }
+
+          y += height + gap;
           if (y - gap + 12 > bottomLimit) overflow = true;
         });
+
+        if (state.typingIndicator) {
+          const height = drawTypingIndicator(ctx, y);
+          y += height;
+          if (y + 12 > bottomLimit) overflow = true;
+        }
         ctx.restore();
         return overflow;
       }
@@ -1072,7 +1299,16 @@
         ctx.fillRect(0, 650, DESIGN_W, 194);
       }
 
-      function drawComposer(ctx) {
+      function measureComposer(ctx) {
+        const text = state.composerText || '';
+        setMessageFont(ctx, 16);
+        const wrappedLines = text ? wrapText(ctx, text, 215) : [];
+        const lines = wrappedLines.slice(-6);
+        const height = text ? Math.max(41, lines.length * 21 + 18) : 41;
+        return { text, lines, height, y: 814 - height };
+      }
+
+      function drawComposer(ctx, layout = measureComposer(ctx)) {
         ctx.save();
         ctx.shadowColor = 'rgba(22, 28, 36, .16)';
         ctx.shadowBlur = 28;
@@ -1097,37 +1333,68 @@
         ctx.shadowColor = 'rgba(22, 28, 36, .16)';
         ctx.shadowBlur = 30;
         ctx.shadowOffsetY = 8;
-        fillRoundedRect(ctx, 80, 773, 282, 41, 20.5, '#fff');
+        fillRoundedRect(ctx, 80, layout.y, 282, layout.height, 20.5, '#fff');
         ctx.restore();
-        strokeRoundedRect(ctx, 80, 773, 282, 41, 20.5, '#f1f1f3', .6);
+        strokeRoundedRect(ctx, 80, layout.y, 282, layout.height, 20.5, '#f1f1f3', .6);
 
-        ctx.fillStyle = '#c2c3c8';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'middle';
-        ctx.font = '300 16px "Helvetica Neue", Arial, sans-serif';
-        ctx.fillText('iMessage', 99, 793.5);
+        if (layout.text) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(94, layout.y + 7, 224, layout.height - 14);
+          ctx.clip();
+          ctx.fillStyle = '#111';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'top';
+          setMessageFont(ctx, 16);
+          const blockHeight = (layout.lines.length - 1) * 21 + 16;
+          const firstY = layout.y + (layout.height - blockHeight) / 2;
+          layout.lines.forEach((line, index) => ctx.fillText(line, 99, firstY + index * 21));
+          ctx.restore();
 
-        ctx.strokeStyle = '#85898f';
-        ctx.lineWidth = 1.2;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(338, 789.5);
-        ctx.lineTo(338, 794.5);
-        ctx.quadraticCurveTo(338, 796.5, 340, 796.5);
-        ctx.quadraticCurveTo(342, 796.5, 342, 794.5);
-        ctx.lineTo(342, 789.5);
-        ctx.quadraticCurveTo(342, 787.5, 340, 787.5);
-        ctx.quadraticCurveTo(338, 787.5, 338, 789.5);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(336, 794);
-        ctx.quadraticCurveTo(336, 800, 340, 800);
-        ctx.quadraticCurveTo(344, 800, 344, 794);
-        ctx.moveTo(340, 800);
-        ctx.lineTo(340, 802.5);
-        ctx.moveTo(338, 802.5);
-        ctx.lineTo(342, 802.5);
-        ctx.stroke();
+          ctx.fillStyle = '#0A84FF';
+          ctx.beginPath();
+          ctx.arc(340, 793.5, 12.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#fff';
+          ctx.lineWidth = 2.2;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          ctx.beginPath();
+          ctx.moveTo(340, 800);
+          ctx.lineTo(340, 787.5);
+          ctx.moveTo(335.5, 792);
+          ctx.lineTo(340, 787.5);
+          ctx.lineTo(344.5, 792);
+          ctx.stroke();
+        } else {
+          ctx.fillStyle = '#c2c3c8';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          setMessageFont(ctx, 16);
+          ctx.fillText('iMessage', 99, 793.5);
+
+          ctx.strokeStyle = '#85898f';
+          ctx.lineWidth = 1.2;
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(338, 789.5);
+          ctx.lineTo(338, 794.5);
+          ctx.quadraticCurveTo(338, 796.5, 340, 796.5);
+          ctx.quadraticCurveTo(342, 796.5, 342, 794.5);
+          ctx.lineTo(342, 789.5);
+          ctx.quadraticCurveTo(342, 787.5, 340, 787.5);
+          ctx.quadraticCurveTo(338, 787.5, 338, 789.5);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(336, 794);
+          ctx.quadraticCurveTo(336, 800, 340, 800);
+          ctx.quadraticCurveTo(344, 800, 344, 794);
+          ctx.moveTo(340, 800);
+          ctx.lineTo(340, 802.5);
+          ctx.moveTo(338, 802.5);
+          ctx.lineTo(342, 802.5);
+          ctx.stroke();
+        }
       }
 
       function renderToCanvas(targetCanvas, pixelWidth, pixelHeight) {
@@ -1141,9 +1408,10 @@
         ctx.fillRect(0, 0, DESIGN_W, DESIGN_H);
         drawHeader(ctx);
         drawSeparator(ctx);
+        const composerLayout = measureComposer(ctx);
         drawComposerBackdrop(ctx);
-        const overflow = drawMessages(ctx);
-        drawComposer(ctx);
+        const overflow = drawMessages(ctx, Math.min(763, composerLayout.y - 10));
+        drawComposer(ctx, composerLayout);
         return overflow;
       }
 
@@ -1258,6 +1526,49 @@
         }
       }
 
+      function readImageFile(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.addEventListener('load', () => resolve(String(reader.result || '')));
+          reader.addEventListener('error', () => reject(new Error('无法读取这个图片文件。')));
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function decodeImage(source) {
+        return new Promise((resolve, reject) => {
+          const image = new Image();
+          image.addEventListener('load', () => resolve(image));
+          image.addEventListener('error', () => reject(new Error('图片格式无法识别。')));
+          image.src = source;
+        });
+      }
+
+      async function setAvatarFromFile(file) {
+        if (!/^image\/(?:jpeg|png|webp|gif)$/i.test(file.type)) throw new Error('请选择 JPG、PNG、WebP 或 GIF 图片。');
+        if (file.size > 20 * 1024 * 1024) throw new Error('头像图片不能超过 20 MB。');
+
+        const sourceImage = await decodeImage(await readImageFile(file));
+        const avatarCanvas = document.createElement('canvas');
+        const avatarSize = 256;
+        avatarCanvas.width = avatarSize;
+        avatarCanvas.height = avatarSize;
+        const avatarContext = avatarCanvas.getContext('2d', { alpha: false });
+        const sourceSize = Math.min(sourceImage.naturalWidth, sourceImage.naturalHeight);
+        const sourceX = (sourceImage.naturalWidth - sourceSize) / 2;
+        const sourceY = (sourceImage.naturalHeight - sourceSize) / 2;
+        avatarContext.fillStyle = '#fff';
+        avatarContext.fillRect(0, 0, avatarSize, avatarSize);
+        avatarContext.imageSmoothingEnabled = true;
+        avatarContext.imageSmoothingQuality = 'high';
+        avatarContext.drawImage(sourceImage, sourceX, sourceY, sourceSize, sourceSize, 0, 0, avatarSize, avatarSize);
+
+        state.avatarImage = avatarCanvas.toDataURL('image/jpeg', .9);
+        state.avatarFileName = file.name;
+        syncAvatarImage();
+        changed();
+      }
+
       function showToast(message) {
         clearTimeout(toastTimer);
         toastElement.textContent = message;
@@ -1266,11 +1577,25 @@
       }
 
       $('#contactName').addEventListener('input', (event) => { state.contactName = event.target.value; changed(); });
-      $('#avatarLetter').addEventListener('input', (event) => {
-        const limited = Array.from(event.target.value).slice(0, 2).join('');
-        if (event.target.value !== limited) event.target.value = limited;
-        state.avatarLetter = limited;
+      $('#statusTime').addEventListener('input', (event) => { state.statusTime = event.target.value; changed(); });
+      $('#avatarFile').addEventListener('change', async (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        try {
+          await setAvatarFromFile(file);
+          showToast('头像已更新。');
+        } catch (error) {
+          showToast(error instanceof Error ? error.message : '头像上传失败。');
+        } finally {
+          event.target.value = '';
+        }
+      });
+      $('#removeAvatar').addEventListener('click', () => {
+        state.avatarImage = '';
+        state.avatarFileName = '';
+        syncAvatarImage();
         changed();
+        showToast('头像已移除，恢复为联系人首字母。');
       });
       $('#networkType').addEventListener('change', (event) => { state.network = event.target.value === 'wifi' ? 'wifi' : '5G'; changed(); });
       $('#batteryLevel').addEventListener('input', (event) => {
@@ -1279,8 +1604,15 @@
         changed();
       });
       $('#timeSeparator').addEventListener('input', (event) => { state.timeSeparator = event.target.value; changed(); });
+      $('#composerText').addEventListener('input', (event) => { state.composerText = event.target.value; changed(); });
+      $('#deliveryStatus').addEventListener('change', (event) => {
+        state.deliveryStatus = event.target.value === 'read' || event.target.value === 'delivered' ? event.target.value : 'none';
+        changed();
+      });
       $('#exportSize').addEventListener('change', renderPreview);
       $('#addMessage').addEventListener('click', addMessage);
+      $('#addTimeSeparator').addEventListener('click', addTimeSeparator);
+      $('#toggleTypingIndicator').addEventListener('click', toggleTypingIndicator);
       $('#parseConversation').addEventListener('click', () => parseBulkConversation(true));
       $('#bulkConversation').addEventListener('paste', () => {
         setTimeout(() => parseBulkConversation(true), 0);
