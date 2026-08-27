@@ -1037,7 +1037,7 @@
       function drawBattery(ctx, level) {
         const label = String(Math.round(level));
         const width = label.length === 3 ? 26 : 21;
-        const x = 358 - width;
+        const x = 346 - width;
         const y = 24.2;
         fillRoundedRect(ctx, x, y, width, 14, 4, level <= 20 ? '#d9343a' : '#050505');
         ctx.fillStyle = '#fff';
@@ -1045,7 +1045,7 @@
         ctx.textBaseline = 'middle';
         setFont(ctx, 650, 9.5);
         ctx.fillText(label, x + width / 2, y + 7.2);
-        fillRoundedRect(ctx, 359.3, y + 4.2, 2, 5.1, 1, '#9a9a9e');
+        fillRoundedRect(ctx, 347.3, y + 4.2, 2, 5.1, 1, '#9a9a9e');
       }
 
       function drawStatusBar(ctx) {
@@ -1053,18 +1053,18 @@
         setFont(ctx, 650, 15.5);
         ctx.fillStyle = '#050505';
         ctx.textAlign = 'left';
-        ctx.fillText(state.statusTime || '', 58, 36);
+        ctx.fillText(state.statusTime || '', 54, 36);
 
         if (referenceIcons.cellular.complete && referenceIcons.cellular.naturalWidth) {
-          ctx.drawImage(referenceIcons.cellular, 288.5, 23, 19.5, 16.3);
+          ctx.drawImage(referenceIcons.cellular, 276.5, 23, 19.5, 16.3);
         }
         if (state.network === 'wifi') {
           if (referenceIcons.wifi.complete && referenceIcons.wifi.naturalWidth) {
-            ctx.drawImage(referenceIcons.wifi, 313, 23.6, 19.5, 15.2);
+            ctx.drawImage(referenceIcons.wifi, 301, 23.6, 19.5, 15.2);
           }
         } else {
           setFont(ctx, 500, 13.5);
-          ctx.fillText('5G', 313, 35.5);
+          ctx.fillText('5G', 301, 35.5);
         }
         drawBattery(ctx, state.battery);
       }
@@ -1160,9 +1160,9 @@
         ctx.lineTo(198 + nameWidth / 2, 136.5);
         ctx.stroke();
 
-        drawFloatingCircle(ctx, 347, 82, 20.5);
+        drawFloatingCircle(ctx, 342, 82, 20.5);
         if (referenceIcons.video.complete && referenceIcons.video.naturalWidth) {
-          ctx.drawImage(referenceIcons.video, 335, 74.4, 23.8, 15.2);
+          ctx.drawImage(referenceIcons.video, 330, 74.4, 23.8, 15.2);
         }
       }
 
@@ -1226,13 +1226,13 @@
       }
 
       function drawTypingIndicator(ctx, y) {
-        const x = 28;
+        const x = 18;
         const width = 70;
         const height = 32;
         fillRoundedRect(ctx, x, y, width, height, height / 2, '#E9E9ED');
 
         ctx.fillStyle = '#B9BBC1';
-        [49, 63, 77].forEach((dotX) => {
+        [x + 21, x + 35, x + 49].forEach((dotX) => {
           ctx.beginPath();
           ctx.arc(dotX, y + height / 2, 3.8, 0, Math.PI * 2);
           ctx.fill();
@@ -1279,7 +1279,7 @@
           } else {
             const layout = measureMessage(ctx, item);
             const mine = item.sender === 'B';
-            const x = mine ? DESIGN_W - 24 - layout.width : 28;
+            const x = mine ? DESIGN_W - 18 - layout.width : 18;
             drawBubble(ctx, item, x, y, layout.width, layout.height, layout.lines);
             height = layout.height;
             if (index === lastBlueIndex && state.deliveryStatus !== 'none') {
