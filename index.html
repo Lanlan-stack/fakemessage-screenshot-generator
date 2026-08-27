@@ -965,6 +965,21 @@
         ctx.letterSpacing = '0.21px';
       }
 
+      function getGlyphMetrics(ctx, fallbackSize) {
+        const metrics = ctx.measureText('Hg');
+        const measuredAscent = Number(metrics.actualBoundingBoxAscent);
+        const measuredDescent = Number(metrics.actualBoundingBoxDescent);
+        const ascent = Number.isFinite(measuredAscent) && measuredAscent > 0 ? measuredAscent : fallbackSize * .76;
+        const descent = Number.isFinite(measuredDescent) && measuredDescent >= 0 ? measuredDescent : fallbackSize * .24;
+        return { ascent, descent };
+      }
+
+      function getCenteredFirstBaseline(ctx, lineCount, y, height, lineHeight, fallbackSize) {
+        const { ascent, descent } = getGlyphMetrics(ctx, fallbackSize);
+        const blockHeight = Math.max(0, lineCount - 1) * lineHeight + ascent + descent;
+        return y + (height - blockHeight) / 2 + ascent;
+      }
+
       function graphemes(value) {
         if (typeof Intl !== 'undefined' && Intl.Segmenter) {
           return Array.from(new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(value), (part) => part.segment);
@@ -1197,12 +1212,11 @@
         ctx.clip();
         ctx.fillStyle = mine ? '#fff' : '#050505';
         ctx.textAlign = 'left';
-        ctx.textBaseline = 'top';
+        ctx.textBaseline = 'alphabetic';
         setMessageFont(ctx, 15.8);
         const textX = x + 14;
-        const textBlockHeight = (lines.length - 1) * 21.5 + 15.8;
-        const firstY = y + (height - textBlockHeight) / 2;
-        lines.forEach((line, lineIndex) => ctx.fillText(line, textX, firstY + lineIndex * 21.5));
+        const firstBaseline = getCenteredFirstBaseline(ctx, lines.length, y, height, 21.5, 15.8);
+        lines.forEach((line, lineIndex) => ctx.fillText(line, textX, firstBaseline + lineIndex * 21.5));
         ctx.restore();
       }
 
@@ -1344,11 +1358,10 @@
           ctx.clip();
           ctx.fillStyle = '#111';
           ctx.textAlign = 'left';
-          ctx.textBaseline = 'top';
+          ctx.textBaseline = 'alphabetic';
           setMessageFont(ctx, 16);
-          const blockHeight = (layout.lines.length - 1) * 21 + 16;
-          const firstY = layout.y + (layout.height - blockHeight) / 2;
-          layout.lines.forEach((line, index) => ctx.fillText(line, 99, firstY + index * 21));
+          const firstBaseline = getCenteredFirstBaseline(ctx, layout.lines.length, layout.y, layout.height, 21, 16);
+          layout.lines.forEach((line, index) => ctx.fillText(line, 99, firstBaseline + index * 21));
           ctx.restore();
 
           ctx.fillStyle = '#0A84FF';
@@ -1369,9 +1382,10 @@
         } else {
           ctx.fillStyle = '#c2c3c8';
           ctx.textAlign = 'left';
-          ctx.textBaseline = 'middle';
+          ctx.textBaseline = 'alphabetic';
           setMessageFont(ctx, 16);
-          ctx.fillText('iMessage', 99, 793.5);
+          const { ascent, descent } = getGlyphMetrics(ctx, 16);
+          ctx.fillText('iMessage', 99, 793.5 + (ascent - descent) / 2);
 
           ctx.strokeStyle = '#85898f';
           ctx.lineWidth = 1.2;
