@@ -1171,6 +1171,7 @@
       }
 
       function drawSeparatorText(ctx, value, y) {
+        ctx.save();
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#929296';
         const dated = value.match(/^(.+?)(\s+at\s+.*)$/i);
@@ -1181,13 +1182,16 @@
         const leadWidth = ctx.measureText(lead).width;
         setFont(ctx, 400, 12);
         const restWidth = ctx.measureText(rest).width;
-        let x = (DESIGN_W - leadWidth - restWidth) / 2;
+        let x = -(leadWidth + restWidth) / 2;
+        ctx.translate(DESIGN_W / 2, y);
+        ctx.scale(.96, 1);
         ctx.textAlign = 'left';
         setFont(ctx, 600, 12);
-        ctx.fillText(lead, x, y);
+        ctx.fillText(lead, x, 0);
         x += leadWidth;
         setFont(ctx, 400, 12);
-        ctx.fillText(rest, x, y);
+        ctx.fillText(rest, x, 0);
+        ctx.restore();
       }
 
       function measureMessage(ctx, message) {
@@ -1255,7 +1259,7 @@
       }
 
       function drawMessages(ctx, bottomLimit = 763) {
-        let y = 197;
+        let y = 192.5;
         let overflow = false;
         let lastBlueIndex = -1;
 
@@ -1274,8 +1278,9 @@
           let gap = 15;
 
           if (item.type === 'separator') {
-            height = 30;
-            drawSeparatorText(ctx, item.text, y + height / 2);
+            height = 0;
+            gap = 12;
+            drawSeparatorText(ctx, item.text, y);
           } else {
             const layout = measureMessage(ctx, item);
             const mine = item.sender === 'B';
@@ -1286,7 +1291,8 @@
               drawDeliveryStatus(ctx, state.deliveryStatus, y + layout.height + 8);
               height += 27;
             }
-            if (next && next.type !== 'separator' && next.sender === item.sender) gap = 13;
+            if (next && next.type === 'separator') gap = 24;
+            else if (next && next.sender === item.sender) gap = 13;
           }
 
           y += height + gap;
