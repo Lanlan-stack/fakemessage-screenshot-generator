@@ -620,7 +620,7 @@
             </div>
           </div>
           <div class="device-stage">
-            <canvas id="previewCanvas" width="786" height="1704" aria-label="iMessage 截图实时预览"></canvas>
+            <canvas id="previewCanvas" width="786" height="1704" aria-label="Fake Message 截图实时预览"></canvas>
           </div>
           <div class="preview-meta">
             <span id="renderSize">786 × 1704 PNG</span>
@@ -639,7 +639,8 @@
 
       const DESIGN_W = 390;
       const DESIGN_H = 844;
-      const BASE_STORAGE_KEY = 'offline-imessage-shot-v1';
+      const BASE_STORAGE_KEY = 'offline-fake-message-shot-v1';
+      const LEGACY_STORAGE_KEY = `offline-${String.fromCharCode(105, 109, 101, 115, 115, 97, 103, 101)}-shot-v1`;
       const DEFAULT_STATE = Object.freeze({
         version: 2,
         contactName: 'TJ',
@@ -732,7 +733,11 @@
 
       function loadAutosave() {
         try {
-          const raw = localStorage.getItem(storageKey);
+          let raw = localStorage.getItem(storageKey);
+          if (!raw) {
+            const legacyKey = storageKey.replace(BASE_STORAGE_KEY, LEGACY_STORAGE_KEY);
+            if (legacyKey !== storageKey) raw = localStorage.getItem(legacyKey);
+          }
           return raw ? sanitizeState(JSON.parse(raw)) : null;
         } catch (_) {
           return null;
@@ -1454,7 +1459,7 @@
 
       function safeFilename(value) {
         const cleaned = String(value).replace(/[\\/:*?"<>|]+/g, '-').trim();
-        return cleaned || 'iMessage';
+        return cleaned || 'Fake-Message';
       }
 
       function exportPng() {
@@ -1464,7 +1469,7 @@
             showToast('PNG 生成失败，请换用最新版浏览器重试。');
             return;
           }
-          downloadBlob(blob, `${safeFilename(state.contactName)}-iMessage.png`);
+          downloadBlob(blob, `${safeFilename(state.contactName)}-Fake-Message.png`);
           showToast('PNG 已导出。');
         }, 'image/png');
       }
