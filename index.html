@@ -265,6 +265,39 @@
     .message-card.is-tj { border-left: 4px solid #b6bcc5; }
     .message-card.is-time { border-left: 4px solid #8f969f; background: #f5f7f9; }
 
+    .image-message-editor {
+      display: grid;
+      min-width: 0;
+      grid-template-columns: 96px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+    }
+
+    .image-message-thumb {
+      display: block;
+      width: 96px;
+      height: 76px;
+      border-radius: 10px;
+      background: #eef1f4;
+      object-fit: contain;
+      object-position: top;
+    }
+
+    .image-message-thumb.is-long { object-fit: cover; }
+
+    .image-message-meta { display: grid; min-width: 0; gap: 7px; }
+
+    .image-message-name {
+      overflow: hidden;
+      color: #596576;
+      font-size: 12px;
+      line-height: 1.35;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .image-message-meta .button { min-height: 34px; justify-self: start; }
+
     .sender-select { height: 38px; padding: 0 9px; background: #fff; }
 
     .entry-kind {
@@ -459,6 +492,8 @@
       .message-card { grid-template-columns: 72px minmax(0, 1fr); }
       .message-actions { grid-column: 1 / -1; display: flex; }
       .icon-button.delete { width: 30px; }
+      .image-message-editor { grid-template-columns: 76px minmax(0, 1fr); }
+      .image-message-thumb { width: 76px; height: 64px; }
       .preview-toolbar { align-items: flex-start; flex-direction: column; }
       .preview-toolbar .button-row { justify-content: flex-start; }
       .device-stage { padding: 14px; }
@@ -568,9 +603,11 @@
           </div>
           <div class="button-row message-buttons">
             <button id="addMessage" class="button soft-blue" type="button">＋ 添加消息</button>
+            <button id="addImageMessage" class="button soft-blue" type="button">＋ 发送图片</button>
             <button id="addTimeSeparator" class="button" type="button">＋ 插入时间分隔</button>
             <button id="toggleTypingIndicator" class="button" type="button" aria-pressed="false">对方正在输入提示</button>
           </div>
+          <input id="newImageMessageFile" class="sr-only" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
           <div id="messagesList" class="messages-list"></div>
         </div>
 
@@ -594,7 +631,7 @@
             <summary>如何使用</summary>
             <ol>
               <li>把以 TJ: 或 B: 开头的整段文字粘贴到输入框，页面会自动识别并排版。</li>
-              <li>也可以单独编辑联系人、时间、网络和每条消息；右侧预览会立即更新。</li>
+              <li>也可以单独编辑联系人、时间、网络和每条消息，或用“发送图片”插入本地图片；右侧预览会立即更新。</li>
               <li>用每条消息旁的 ↑、↓ 调整顺序，或用“删除”移除。</li>
               <li>点击“导出 PNG”，即可保存 786 × 1704 的截图。</li>
               <li>点击“保存 JSON”备份配置；以后可用“从 JSON 恢复”继续编辑。</li>
@@ -641,8 +678,18 @@
       const DESIGN_H = 844;
       const BASE_STORAGE_KEY = 'offline-fake-message-shot-v1';
       const LEGACY_STORAGE_KEY = `offline-${String.fromCharCode(105, 109, 101, 115, 115, 97, 103, 101)}-shot-v1`;
+
+      // 图片消息预览与压缩设置：后续只需在这里微调。
+      const IMAGE_MESSAGE_SETTINGS = Object.freeze({
+        MAX_DISPLAY_WIDTH: 250,
+        MAX_DISPLAY_HEIGHT: 280,
+        LONG_IMAGE_ASPECT_RATIO_THRESHOLD: 1.6, // 图片高度 ÷ 宽度
+        COMPRESSION_MAX_DIMENSION: 1600,
+        JPEG_WEBP_QUALITY: 0.82
+      });
+
       const DEFAULT_STATE = Object.freeze({
-        version: 2,
+        version: 3,
         contactName: 'TJ',
         statusTime: '9:41',
         avatarImage: '',
@@ -685,6 +732,7 @@
       referenceIcons.tailBlue.addEventListener('load', queueRender);
       referenceIcons.tailGray.addEventListener('load', queueRender);
       const uploadedAvatar = new Image();
+      const messageImageCache = new Map();
       let uploadedAvatarSource = '';
       uploadedAvatar.addEventListener('load', queueRender);
       uploadedAvatar.addEventListener('error', () => {
@@ -710,7 +758,7 @@
         if (!Array.isArray(value.messages)) throw new Error('JSON 中缺少 messages 数组。');
 
         return {
-          version: 2,
+          version: 3,
           contactName: typeof value.contactName === 'string' ? value.contactName.slice(0, 36) : 'TJ',
           statusTime: typeof value.statusTime === 'string' ? value.statusTime.slice(0, 8) : '9:41',
           avatarImage: typeof value.avatarImage === 'string' && /^data:image\/(?:jpeg|png|webp);base64,/i.test(value.avatarImage) && value.avatarImage.length <= 1500000 ? value.avatarImage : '',
@@ -721,13 +769,27 @@
           composerText: typeof value.composerText === 'string' ? value.composerText.slice(0, 500) : '',
           deliveryStatus: value.deliveryStatus === 'read' || value.deliveryStatus === 'delivered' ? value.deliveryStatus : 'none',
           typingIndicator: value.typingIndicator === true,
-          messages: value.messages.slice(0, 100).map((item) => item && item.type === 'separator'
-            ? { type: 'separator', text: typeof item.text === 'string' ? item.text.replace(/\r?\n/g, ' ').slice(0, 120) : '' }
-            : {
-                type: 'message',
-                sender: item && item.sender === 'B' ? 'B' : 'TJ',
-                text: item && typeof item.text === 'string' ? item.text.slice(0, 5000) : ''
-              })
+          messages: value.messages.slice(0, 100).map((item) => {
+            if (item && item.type === 'separator') {
+              return { type: 'separator', text: typeof item.text === 'string' ? item.text.replace(/\r?\n/g, ' ').slice(0, 120) : '' };
+            }
+            if (item && item.type === 'image' && typeof item.imageData === 'string'
+              && /^data:image\/(?:jpeg|png|webp);base64,/i.test(item.imageData) && item.imageData.length <= 12000000) {
+              return {
+                type: 'image',
+                sender: item.sender === 'B' ? 'B' : 'TJ',
+                imageData: item.imageData,
+                imageName: typeof item.imageName === 'string' ? item.imageName.slice(0, 160) : '图片',
+                width: Math.max(1, Math.min(IMAGE_MESSAGE_SETTINGS.COMPRESSION_MAX_DIMENSION, Math.round(Number(item.width) || 1))),
+                height: Math.max(1, Math.min(IMAGE_MESSAGE_SETTINGS.COMPRESSION_MAX_DIMENSION, Math.round(Number(item.height) || 1)))
+              };
+            }
+            return {
+              type: 'message',
+              sender: item && item.sender === 'B' ? 'B' : 'TJ',
+              text: item && typeof item.text === 'string' ? item.text.slice(0, 5000) : ''
+            };
+          })
         };
       }
 
@@ -783,6 +845,7 @@
 
         state.messages.forEach((item, index) => {
           const isSeparator = item.type === 'separator';
+          const isImage = item.type === 'image';
           const card = document.createElement('article');
           card.className = `message-card ${isSeparator ? 'is-time' : item.sender === 'B' ? 'is-b' : 'is-tj'}`;
           card.dataset.index = String(index);
@@ -806,17 +869,52 @@
             leadingControl = sender;
           }
 
-          const text = document.createElement(isSeparator ? 'input' : 'textarea');
-          if (isSeparator) text.type = 'text';
-          text.className = `message-text${isSeparator ? ' time-separator-text' : ''}`;
-          text.value = item.text;
-          text.placeholder = isSeparator ? 'Today 11:42 PM' : '输入消息文本';
-          text.maxLength = isSeparator ? 120 : 5000;
-          text.setAttribute('aria-label', `第 ${index + 1} 条${isSeparator ? '时间分隔' : '消息'}文本`);
-          text.addEventListener('input', () => {
-            state.messages[index].text = text.value;
-            changed();
-          });
+          let contentControl;
+          if (isImage) {
+            const editor = document.createElement('div');
+            editor.className = 'image-message-editor';
+            const preview = document.createElement('img');
+            preview.className = `image-message-thumb${isLongImage(item) ? ' is-long' : ''}`;
+            preview.src = item.imageData;
+            preview.alt = '';
+
+            const meta = document.createElement('div');
+            meta.className = 'image-message-meta';
+            const name = document.createElement('span');
+            name.className = 'image-message-name';
+            name.textContent = `${item.imageName || '图片'} · ${item.width} × ${item.height}`;
+            name.title = item.imageName || '图片';
+            const replace = document.createElement('button');
+            replace.type = 'button';
+            replace.className = 'button';
+            replace.textContent = '替换图片';
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/jpeg,image/png,image/webp,image/gif';
+            fileInput.className = 'sr-only';
+            replace.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', async () => {
+              const file = fileInput.files && fileInput.files[0];
+              if (file) await replaceImageMessage(index, file);
+              fileInput.value = '';
+            });
+            meta.append(name, replace, fileInput);
+            editor.append(preview, meta);
+            contentControl = editor;
+          } else {
+            const text = document.createElement(isSeparator ? 'input' : 'textarea');
+            if (isSeparator) text.type = 'text';
+            text.className = `message-text${isSeparator ? ' time-separator-text' : ''}`;
+            text.value = item.text;
+            text.placeholder = isSeparator ? 'Today 11:42 PM' : '输入消息文本';
+            text.maxLength = isSeparator ? 120 : 5000;
+            text.setAttribute('aria-label', `第 ${index + 1} 条${isSeparator ? '时间分隔' : '消息'}文本`);
+            text.addEventListener('input', () => {
+              state.messages[index].text = text.value;
+              changed();
+            });
+            contentControl = text;
+          }
 
           const actions = document.createElement('div');
           actions.className = 'message-actions';
@@ -826,7 +924,7 @@
           const remove = actionButton('删除', '删除', false, () => deleteMessage(index));
           remove.classList.add('delete');
           actions.append(up, down, remove);
-          card.append(leadingControl, text, actions);
+          card.append(leadingControl, contentControl, actions);
           messagesList.append(card);
         });
       }
@@ -853,19 +951,55 @@
       }
 
       function deleteMessage(index) {
-        state.messages.splice(index, 1);
+        const [removed] = state.messages.splice(index, 1);
+        if (removed && removed.type === 'image') messageImageCache.delete(removed.imageData);
         renderMessageEditor();
         changed();
       }
 
       function addMessage() {
-        const last = state.messages.slice().reverse().find((item) => item.type !== 'separator');
-        state.messages.push({ type: 'message', sender: !last || last.sender === 'B' ? 'TJ' : 'B', text: '' });
+        state.messages.push({ type: 'message', sender: nextMessageSender(), text: '' });
         renderMessageEditor();
         changed();
         const newest = messagesList.lastElementChild;
         newest?.querySelector('textarea')?.focus();
         newest?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      function nextMessageSender() {
+        const last = state.messages.slice().reverse().find((item) => item.type === 'message' || item.type === 'image');
+        return !last || last.sender === 'B' ? 'TJ' : 'B';
+      }
+
+      async function addImageMessage(file) {
+        try {
+          showToast('正在处理图片…');
+          const image = await compressImageFile(file);
+          state.messages.push({ type: 'image', sender: nextMessageSender(), ...image });
+          getMessageImageRecord(image.imageData);
+          renderMessageEditor();
+          changed();
+          messagesList.lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          showToast('图片消息已添加。');
+        } catch (error) {
+          showToast(error instanceof Error ? error.message : '图片处理失败。');
+        }
+      }
+
+      async function replaceImageMessage(index, file) {
+        try {
+          showToast('正在处理图片…');
+          const image = await compressImageFile(file);
+          if (!state.messages[index] || state.messages[index].type !== 'image') return;
+          messageImageCache.delete(state.messages[index].imageData);
+          state.messages[index] = { ...state.messages[index], ...image };
+          getMessageImageRecord(image.imageData);
+          renderMessageEditor();
+          changed();
+          showToast('图片消息已替换。');
+        } catch (error) {
+          showToast(error instanceof Error ? error.message : '图片处理失败。');
+        }
       }
 
       function addTimeSeparator() {
@@ -908,6 +1042,7 @@
         }
 
         state.messages = parsed;
+        messageImageCache.clear();
         renderMessageEditor();
         changed();
         if (showResult) {
@@ -1203,6 +1338,80 @@
         return { lines, width, height };
       }
 
+      function isLongImage(message) {
+        return message.height / message.width > IMAGE_MESSAGE_SETTINGS.LONG_IMAGE_ASPECT_RATIO_THRESHOLD;
+      }
+
+      function measureImageMessage(message) {
+        const ratio = message.height / message.width;
+        if (isLongImage(message)) {
+          return {
+            width: IMAGE_MESSAGE_SETTINGS.MAX_DISPLAY_WIDTH,
+            height: IMAGE_MESSAGE_SETTINGS.MAX_DISPLAY_HEIGHT,
+            cropped: true
+          };
+        }
+
+        let width = IMAGE_MESSAGE_SETTINGS.MAX_DISPLAY_WIDTH;
+        let height = width * ratio;
+        if (height > IMAGE_MESSAGE_SETTINGS.MAX_DISPLAY_HEIGHT) {
+          height = IMAGE_MESSAGE_SETTINGS.MAX_DISPLAY_HEIGHT;
+          width = height / ratio;
+        }
+        return { width, height, cropped: false };
+      }
+
+      function getMessageImageRecord(source) {
+        if (messageImageCache.has(source)) return messageImageCache.get(source);
+        const image = new Image();
+        const record = { image, loaded: false, failed: false, promise: null };
+        record.promise = new Promise((resolve, reject) => {
+          image.addEventListener('load', () => {
+            record.loaded = true;
+            queueRender();
+            resolve(image);
+          }, { once: true });
+          image.addEventListener('error', () => {
+            record.failed = true;
+            reject(new Error('有一张图片消息无法读取。'));
+          }, { once: true });
+        });
+        record.promise.catch(() => { /* export reports unreadable images to the user */ });
+        image.src = source;
+        messageImageCache.set(source, record);
+        return record;
+      }
+
+      function ensureMessageImagesLoaded() {
+        const promises = state.messages
+          .filter((item) => item.type === 'image')
+          .map((item) => getMessageImageRecord(item.imageData).promise);
+        return Promise.all(promises);
+      }
+
+      function drawImageMessage(ctx, message, x, y, layout) {
+        const radius = 18;
+        fillRoundedRect(ctx, x, y, layout.width, layout.height, radius, '#eef1f4');
+        const record = getMessageImageRecord(message.imageData);
+        if (!record.loaded || !record.image.naturalWidth) return;
+
+        ctx.save();
+        roundedRectPath(ctx, x, y, layout.width, layout.height, radius);
+        ctx.clip();
+        if (layout.cropped) {
+          const sourceWidth = record.image.naturalWidth;
+          const sourceHeight = record.image.naturalHeight;
+          const scale = Math.max(layout.width / sourceWidth, layout.height / sourceHeight);
+          const cropWidth = layout.width / scale;
+          const cropHeight = layout.height / scale;
+          const sourceX = Math.max(0, (sourceWidth - cropWidth) / 2);
+          ctx.drawImage(record.image, sourceX, 0, cropWidth, Math.min(sourceHeight, cropHeight), x, y, layout.width, layout.height);
+        } else {
+          ctx.drawImage(record.image, x, y, layout.width, layout.height);
+        }
+        ctx.restore();
+      }
+
       function drawBubble(ctx, message, x, y, width, height, lines) {
         const mine = message.sender === 'B';
         const fill = mine ? '#0A84FF' : '#E9E9ED';
@@ -1264,7 +1473,7 @@
         let lastBlueIndex = -1;
 
         state.messages.forEach((item, index) => {
-          if (item.type === 'message' && item.sender === 'B') lastBlueIndex = index;
+          if ((item.type === 'message' || item.type === 'image') && item.sender === 'B') lastBlueIndex = index;
         });
 
         ctx.save();
@@ -1281,6 +1490,18 @@
             height = 0;
             gap = 12;
             drawSeparatorText(ctx, item.text, y);
+          } else if (item.type === 'image') {
+            const layout = measureImageMessage(item);
+            const mine = item.sender === 'B';
+            const x = mine ? DESIGN_W - 18 - layout.width : 18;
+            drawImageMessage(ctx, item, x, y, layout);
+            height = layout.height;
+            if (index === lastBlueIndex && state.deliveryStatus !== 'none') {
+              drawDeliveryStatus(ctx, state.deliveryStatus, y + layout.height + 8);
+              height += 27;
+            }
+            if (next && next.type === 'separator') gap = 24;
+            else if (next && next.sender === item.sender) gap = 13;
           } else {
             const layout = measureMessage(ctx, item);
             const mine = item.sender === 'B';
@@ -1468,16 +1689,21 @@
         return cleaned || 'Fake-Message';
       }
 
-      function exportPng() {
-        renderPreview();
-        canvas.toBlob((blob) => {
-          if (!blob) {
-            showToast('PNG 生成失败，请换用最新版浏览器重试。');
-            return;
-          }
-          downloadBlob(blob, `${safeFilename(state.contactName)}-Fake-Message.png`);
-          showToast('PNG 已导出。');
-        }, 'image/png');
+      async function exportPng() {
+        try {
+          await ensureMessageImagesLoaded();
+          renderPreview();
+          canvas.toBlob((blob) => {
+            if (!blob) {
+              showToast('PNG 生成失败，请换用最新版浏览器重试。');
+              return;
+            }
+            downloadBlob(blob, `${safeFilename(state.contactName)}-Fake-Message.png`);
+            showToast('PNG 已导出。');
+          }, 'image/png');
+        } catch (error) {
+          showToast(error instanceof Error ? error.message : '图片尚未准备好，无法导出。');
+        }
       }
 
       function saveJson() {
@@ -1490,6 +1716,7 @@
         try {
           const imported = sanitizeState(JSON.parse(await file.text()));
           state = imported;
+          messageImageCache.clear();
           syncTopFields();
           renderMessageEditor();
           changed();
@@ -1526,6 +1753,17 @@
       }
 
       function importFromHash() {
+        const copyMatch = location.hash.match(/^#copy=([A-Za-z0-9_-]+)$/);
+        if (copyMatch) {
+          storageKey = `${BASE_STORAGE_KEY}-copy-${copyMatch[1]}`;
+          const savedCopy = loadAutosave();
+          if (savedCopy) {
+            state = savedCopy;
+            return true;
+          }
+          showToast('这个对话副本已经不存在。');
+          return false;
+        }
         const match = location.hash.match(/^#conversation=([A-Za-z0-9_-]+)$/);
         if (!match) return false;
         try {
@@ -1541,7 +1779,19 @@
 
       function duplicatePage() {
         const baseUrl = location.href.split('#')[0];
-        const duplicateUrl = `${baseUrl}#conversation=${encodeState(state)}`;
+        let duplicateUrl;
+        try {
+          const token = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+          localStorage.setItem(`${BASE_STORAGE_KEY}-copy-${token}`, JSON.stringify(state));
+          duplicateUrl = `${baseUrl}#copy=${token}`;
+        } catch (_) {
+          const encoded = encodeState(state);
+          if (encoded.length > 100000) {
+            showToast('图片数据较大，浏览器无法直接复制；请先保存 JSON。');
+            return;
+          }
+          duplicateUrl = `${baseUrl}#conversation=${encoded}`;
+        }
         const newWindow = window.open(duplicateUrl, '_blank');
         if (newWindow) {
           newWindow.opener = null;
@@ -1567,6 +1817,60 @@
           image.addEventListener('error', () => reject(new Error('图片格式无法识别。')));
           image.src = source;
         });
+      }
+
+      function canvasToBlob(canvasElement, type, quality) {
+        return new Promise((resolve) => canvasElement.toBlob(resolve, type, quality));
+      }
+
+      function blobToDataUrl(blob) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.addEventListener('load', () => resolve(String(reader.result || '')));
+          reader.addEventListener('error', () => reject(new Error('无法保存处理后的图片。')));
+          reader.readAsDataURL(blob);
+        });
+      }
+
+      async function decodeUploadImage(file) {
+        if ('createImageBitmap' in window) {
+          try {
+            return await createImageBitmap(file, { imageOrientation: 'from-image' });
+          } catch (_) { /* older browsers fall back to Image */ }
+        }
+        const source = await readImageFile(file);
+        return decodeImage(source);
+      }
+
+      async function compressImageFile(file) {
+        if (!/^image\/(?:jpeg|png|webp|gif)$/i.test(file.type)) throw new Error('请选择 JPG、PNG、WebP 或 GIF 图片。');
+        if (file.size > 40 * 1024 * 1024) throw new Error('图片不能超过 40 MB。');
+
+        const sourceImage = await decodeUploadImage(file);
+        const sourceWidth = sourceImage.width || sourceImage.naturalWidth;
+        const sourceHeight = sourceImage.height || sourceImage.naturalHeight;
+        if (!sourceWidth || !sourceHeight) throw new Error('图片尺寸无法读取。');
+        const scale = Math.min(1, IMAGE_MESSAGE_SETTINGS.COMPRESSION_MAX_DIMENSION / Math.max(sourceWidth, sourceHeight));
+        const outputWidth = Math.max(1, Math.round(sourceWidth * scale));
+        const outputHeight = Math.max(1, Math.round(sourceHeight * scale));
+        const imageCanvas = document.createElement('canvas');
+        imageCanvas.width = outputWidth;
+        imageCanvas.height = outputHeight;
+        const imageContext = imageCanvas.getContext('2d');
+        imageContext.imageSmoothingEnabled = true;
+        imageContext.imageSmoothingQuality = 'high';
+        imageContext.drawImage(sourceImage, 0, 0, outputWidth, outputHeight);
+        if (typeof sourceImage.close === 'function') sourceImage.close();
+
+        let blob = await canvasToBlob(imageCanvas, 'image/webp', IMAGE_MESSAGE_SETTINGS.JPEG_WEBP_QUALITY);
+        if (!blob) blob = await canvasToBlob(imageCanvas, 'image/jpeg', IMAGE_MESSAGE_SETTINGS.JPEG_WEBP_QUALITY);
+        if (!blob) throw new Error('浏览器无法压缩这张图片。');
+        return {
+          imageData: await blobToDataUrl(blob),
+          imageName: file.name.slice(0, 160) || '图片',
+          width: outputWidth,
+          height: outputHeight
+        };
       }
 
       async function setAvatarFromFile(file) {
@@ -1636,6 +1940,16 @@
       });
       $('#exportSize').addEventListener('change', renderPreview);
       $('#addMessage').addEventListener('click', addMessage);
+      $('#addImageMessage').addEventListener('click', () => {
+        const input = $('#newImageMessageFile');
+        input.value = '';
+        input.click();
+      });
+      $('#newImageMessageFile').addEventListener('change', async (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (file) await addImageMessage(file);
+        event.target.value = '';
+      });
       $('#addTimeSeparator').addEventListener('click', addTimeSeparator);
       $('#toggleTypingIndicator').addEventListener('click', toggleTypingIndicator);
       $('#parseConversation').addEventListener('click', () => parseBulkConversation(true));
