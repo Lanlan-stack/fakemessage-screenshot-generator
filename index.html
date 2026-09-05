@@ -508,11 +508,11 @@
   <main class="app">
     <header class="app-header">
       <div>
-        <p class="eyebrow">Offline screenshot studio</p>
-        <h1>Fake Message截图生成器</h1>
-        <p class="subtitle">编辑内容、实时预览，再直接导出高清 PNG。所有数据只在当前浏览器中处理，不上传网络，也不需要安装任何依赖。</p>
+        <p class="eyebrow" data-i18n="eyebrow">Offline screenshot studio</p>
+        <h1 data-i18n="title">Fake Message截图生成器</h1>
+        <p class="subtitle" data-i18n="subtitle">编辑内容、实时预览，再直接导出高清 PNG。所有数据只在当前浏览器中处理，不上传网络，也不需要安装任何依赖。</p>
       </div>
-      <span class="offline-badge">单文件 · 完全离线</span>
+      <span class="offline-badge" data-i18n="offlineBadge">单文件 · 完全离线</span>
     </header>
 
     <div class="workspace">
@@ -520,56 +520,57 @@
         <div class="section">
           <div class="section-heading">
             <div>
-              <h2>整段粘贴</h2>
-              <p class="section-note">每条消息以 TJ: 或 B: 开头；识别标记不会显示在气泡里。粘贴后自动排版。</p>
+              <h2 data-i18n="bulkTitle">整段粘贴</h2>
+              <p class="section-note" data-i18n="bulkNote">支持任意两名说话人、光冒号交替、日期及相对时间；识别标记不会显示在气泡里。</p>
             </div>
           </div>
           <div class="field">
-            <label for="bulkConversation">对话文本</label>
+            <label for="bulkConversation" data-i18n="conversationText">对话文本</label>
             <textarea id="bulkConversation" class="bulk-textarea" spellcheck="false" placeholder="TJ: You said my comms encryption had twenty-three bugs.&#10;B: Yes&#10;B: T tried to fix some of them.&#10;TJ: How many are left?&#10;B: Fifty-five."></textarea>
           </div>
           <div class="button-row" style="margin-top: 10px;">
-            <button id="parseConversation" class="button soft-blue" type="button">识别并替换消息</button>
+            <button id="parseConversation" class="button soft-blue" type="button" data-i18n="parseButton">识别并替换消息</button>
+            <button id="swapParticipants" class="button" type="button" data-i18n="swapButton">一键交换双方</button>
           </div>
         </div>
 
         <div class="section">
           <div class="section-heading">
             <div>
-              <h2>顶部信息</h2>
-              <p class="section-note">状态栏时间、联系人和网络信息均可编辑。</p>
+              <h2 data-i18n="topTitle">顶部信息</h2>
+              <p class="section-note" data-i18n="topNote">状态栏时间、联系人和网络信息均可编辑。</p>
             </div>
           </div>
           <div class="fields top-info-grid">
             <div class="field">
-              <label for="statusTime">状态栏时间</label>
+              <label for="statusTime" data-i18n="statusTime">状态栏时间</label>
               <input id="statusTime" type="text" maxlength="8" autocomplete="off" value="9:41" placeholder="9:41">
             </div>
             <div class="field">
-              <label for="networkType">网络显示</label>
+              <label for="networkType" data-i18n="network">网络显示</label>
               <select id="networkType">
                 <option value="5G">5G</option>
                 <option value="wifi">Wi-Fi</option>
               </select>
             </div>
             <div class="field">
-              <span class="field-label">电量</span>
+              <span class="field-label" data-i18n="battery">电量</span>
               <div class="battery-row">
                 <input id="batteryLevel" type="range" min="1" max="100" value="82" aria-label="电量百分比">
                 <output id="batteryValue" class="battery-value" for="batteryLevel">82%</output>
               </div>
             </div>
             <div class="field contact-name-field">
-              <label for="contactName">联系人名称</label>
+              <label for="contactName" data-i18n="contactName">联系人名称</label>
               <input id="contactName" type="text" maxlength="36" autocomplete="off" value="TJ">
             </div>
             <div class="field avatar-field">
-              <span class="field-label">联系人头像</span>
+              <span class="field-label" data-i18n="avatar">联系人头像</span>
               <div class="avatar-upload-row">
-                <label class="button soft-blue" for="avatarFile">选择图片</label>
+                <label class="button soft-blue" for="avatarFile" data-i18n="chooseImage">选择图片</label>
                 <input id="avatarFile" class="sr-only" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
-                <button id="removeAvatar" class="button" type="button">移除头像</button>
-                <span id="avatarStatus" class="avatar-status">未上传，显示联系人首字母</span>
+                <button id="removeAvatar" class="button" type="button" data-i18n="removeAvatar">移除头像</button>
+                <span id="avatarStatus" class="avatar-status">未上传，显示联系人首字</span>
               </div>
             </div>
           </div>
@@ -578,34 +579,37 @@
         <div class="section">
           <div class="section-heading">
             <div>
-              <h2>消息</h2>
-              <p class="section-note">B = 右侧蓝色；TJ = 左侧灰色。文本会原样显示。</p>
+              <h2 data-i18n="messagesTitle">消息</h2>
+              <p class="section-note" data-i18n="messagesNote">右侧蓝色为已发送，左侧灰色为已接收。文本会原样显示。</p>
             </div>
           </div>
           <div class="fields message-settings">
             <div class="field wide">
-              <label for="timeSeparator">顶部时间分隔</label>
-              <input id="timeSeparator" type="text" maxlength="60" autocomplete="off" value="Today 5:13 AM" placeholder="Today 5:13 AM">
-              <p class="field-example">Today 5:13 AM / Yesterday 11:42 PM / Sun, Apr 5 at 12:11 AM</p>
+              <label for="timeSeparator" data-i18n="topSeparator">顶部时间分隔</label>
+              <input id="timeSeparator" type="text" maxlength="60" autocomplete="off" value="今天 5:13" placeholder="今天 5:13">
+              <p id="timeExamples" class="field-example">今天 5:13 / 昨天 23:42 / 周日 0:11 / 4月5日 周日 0:11</p>
+              <div class="button-row">
+                <button id="normalizeTopTime" class="button" type="button" data-i18n="normalizeTime">↻ 规范化时间</button>
+              </div>
             </div>
             <div class="field wide">
-              <label for="composerText">未发送信息内容</label>
-              <textarea id="composerText" maxlength="500" spellcheck="false" placeholder="留空时为默认"></textarea>
+              <label for="composerText" data-i18n="unsentContent">未发送信息内容</label>
+              <textarea id="composerText" maxlength="500" spellcheck="false" placeholder="留空时为默认" data-i18n-placeholder="emptyDefault"></textarea>
             </div>
             <div class="field">
-              <label for="deliveryStatus">最后一条蓝色消息状态</label>
+              <label for="deliveryStatus" data-i18n="deliveryLabel">最后一条蓝色消息状态</label>
               <select id="deliveryStatus">
-                <option value="none">不显示</option>
+                <option value="none">隐藏</option>
                 <option value="read">Read</option>
                 <option value="delivered">Delivered</option>
               </select>
             </div>
           </div>
           <div class="button-row message-buttons">
-            <button id="addMessage" class="button soft-blue" type="button">＋ 添加消息</button>
-            <button id="addImageMessage" class="button soft-blue" type="button">＋ 发送图片</button>
-            <button id="addTimeSeparator" class="button" type="button">＋ 插入时间分隔</button>
-            <button id="toggleTypingIndicator" class="button" type="button" aria-pressed="false">对方正在输入提示</button>
+            <button id="addMessage" class="button soft-blue" type="button" data-i18n="addMessage">＋ 添加消息</button>
+            <button id="addImageMessage" class="button soft-blue" type="button" data-i18n="sendImage">＋ 发送图片</button>
+            <button id="addTimeSeparator" class="button" type="button" data-i18n="addSeparator">＋ 插入时间分隔</button>
+            <button id="toggleTypingIndicator" class="button" type="button" aria-pressed="false" data-i18n="typingIndicator">对方正在输入提示</button>
           </div>
           <input id="newImageMessageFile" class="sr-only" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
           <div id="messagesList" class="messages-list"></div>
@@ -614,30 +618,30 @@
         <div class="section">
           <div class="section-heading">
             <div>
-              <h2>文件与副本</h2>
-              <p class="section-note">JSON 可用于稍后恢复或批量保存不同版本。</p>
+              <h2 data-i18n="filesTitle">文件与副本</h2>
+              <p class="section-note" data-i18n="filesNote">JSON 可用于稍后恢复或批量保存不同版本。</p>
             </div>
           </div>
           <div class="button-row">
-            <button id="saveJson" class="button" type="button">保存 JSON</button>
-            <button id="loadJson" class="button" type="button">从 JSON 恢复</button>
-            <button id="duplicatePage" class="button" type="button">复制为新标签页</button>
+            <button id="saveJson" class="button" type="button" data-i18n="saveJson">保存 JSON</button>
+            <button id="loadJson" class="button" type="button" data-i18n="loadJson">从 JSON 恢复</button>
+            <button id="duplicatePage" class="button" type="button" data-i18n="duplicate">复制为新标签页</button>
           </div>
           <input id="jsonFile" class="sr-only" type="file" accept="application/json,.json">
         </div>
 
         <div class="section">
           <details>
-            <summary>如何使用</summary>
+            <summary data-i18n="howTo">如何使用</summary>
             <ol>
-              <li>把以 TJ: 或 B: 开头的整段文字粘贴到输入框，页面会自动识别并排版。</li>
-              <li>也可以单独编辑联系人、时间、网络和每条消息，或用“发送图片”插入本地图片；右侧预览会立即更新。</li>
-              <li>用每条消息旁的 ↑、↓ 调整顺序，或用“删除”移除。</li>
-              <li>点击“导出 PNG”，即可保存 786 × 1704 的截图。</li>
-              <li>点击“保存 JSON”备份配置；以后可用“从 JSON 恢复”继续编辑。</li>
-              <li>“复制为新标签页”会把当前内容复制到一个独立页面，方便连续制作多张截图。</li>
+              <li data-i18n="help1">粘贴带说话人标记、光冒号或时间语句的对话，页面会自动识别并排版。</li>
+              <li data-i18n="help2">也可以单独编辑联系人、时间、网络和每条消息，或用“发送图片”插入本地图片；右侧预览会立即更新。</li>
+              <li data-i18n="help3">用每条消息旁的 ↑、↓ 调整顺序，或用“删除”移除。</li>
+              <li data-i18n="help4">点击“导出 PNG”，即可保存 786 × 1704 的截图。</li>
+              <li data-i18n="help5">点击“保存 JSON”备份配置；以后可用“从 JSON 恢复”继续编辑。</li>
+              <li data-i18n="help6">“复制为新标签页”会把当前内容复制到一个独立页面，方便连续制作多张截图。</li>
             </ol>
-            <p class="privacy-note">提示：制作和分享模拟对话时，请避免冒充他人、误导受众或泄露真实隐私信息。</p>
+            <p class="privacy-note" data-i18n="privacy">提示：制作和分享模拟对话时，请避免冒充他人、误导受众或泄露真实隐私信息。</p>
           </details>
         </div>
       </section>
@@ -646,14 +650,19 @@
         <section class="preview-card card">
           <div class="preview-toolbar">
             <div>
-              <h2>实时预览</h2>
-              <p class="section-note">导出与预览使用同一张画布。</p>
+              <h2 data-i18n="previewTitle">实时预览</h2>
+              <p class="section-note" data-i18n="previewNote">导出与预览使用同一张画布。</p>
             </div>
             <div class="button-row">
+              <select id="displayLanguage" class="button" aria-label="显示语言">
+                <option value="zh">中文</option>
+                <option value="en">English</option>
+              </select>
               <select id="exportSize" class="button" aria-label="PNG 导出尺寸">
                 <option value="786x1704">786 × 1704</option>
               </select>
-              <button id="exportPng" class="button primary" type="button">导出 PNG</button>
+              <button id="exportPng" class="button primary" type="button" data-i18n="exportPng">导出 PNG</button>
+              <button id="resetAll" class="button" type="button" data-i18n="resetAll">清除并恢复默认</button>
             </div>
           </div>
           <div class="device-stage">
@@ -688,24 +697,68 @@
         JPEG_WEBP_QUALITY: 0.82
       });
 
+      const I18N = Object.freeze({
+        zh: {
+          documentTitle: 'Fake Message截图生成器', eyebrow: 'Offline screenshot studio', title: 'Fake Message截图生成器',
+          subtitle: '编辑内容、实时预览，再直接导出高清 PNG。所有数据只在当前浏览器中处理，不上传网络，也不需要安装任何依赖。',
+          offlineBadge: '单文件 · 完全离线', bulkTitle: '整段粘贴', bulkNote: '支持任意两名说话人、光冒号交替、日期及相对时间；识别标记不会显示在气泡里。',
+          conversationText: '对话文本', parseButton: '识别并替换消息', swapButton: '一键交换双方', topTitle: '顶部信息', topNote: '状态栏时间、联系人和网络信息均可编辑。',
+          statusTime: '状态栏时间', network: '网络显示', battery: '电量', contactName: '联系人名称', avatar: '联系人头像', chooseImage: '选择图片', removeAvatar: '移除头像', language: '显示语言',
+          messagesTitle: '消息', messagesNote: '右侧蓝色为已发送，左侧灰色为已接收。文本会原样显示。', topSeparator: '顶部时间分隔', normalizeTime: '↻ 规范化时间', normalizeTimeTitle: '规范化时间', timeNormalized: '时间已按当前语言规范化。', timeReset: '无法识别原内容，已恢复默认时间。', unsentContent: '未发送信息内容', emptyDefault: '留空时为默认',
+          deliveryLabel: '最后一条蓝色消息状态', hidden: '隐藏', read: '已读', delivered: '已送达', addMessage: '＋ 添加消息', sendImage: '＋ 发送图片', addSeparator: '＋ 插入时间分隔', typingIndicator: '对方正在输入提示',
+          filesTitle: '文件与副本', filesNote: 'JSON 可用于稍后恢复或批量保存不同版本。', saveJson: '保存 JSON', loadJson: '从 JSON 恢复', duplicate: '复制为新标签页', howTo: '如何使用',
+          help1: '粘贴带说话人标记、光冒号或时间语句的对话，页面会自动识别并排版。', help2: '也可以单独编辑联系人、时间、网络和每条消息，或用“发送图片”插入本地图片；右侧预览会立即更新。', help3: '用每条消息旁的 ↑、↓ 调整顺序，或用“删除”移除。', help4: '点击“导出 PNG”，即可保存 786 × 1704 的截图。', help5: '点击“保存 JSON”备份配置；以后可用“从 JSON 恢复”继续编辑。', help6: '“复制为新标签页”会把当前内容复制到一个独立页面，方便连续制作多张截图。', privacy: '提示：制作和分享模拟对话时，请避免冒充他人、误导受众或泄露真实隐私信息。',
+          previewTitle: '实时预览', previewNote: '导出与预览使用同一张画布。', exportPng: '导出 PNG', resetAll: '清除并恢复默认', resetConfirm: '确定清除当前编辑内容并恢复默认状态吗？', resetDone: '已恢复默认状态。', sent: '发送', received: '接收', timeKind: '时间', messagePlaceholder: '输入消息文本',
+          replaceImage: '替换图片', image: '图片', moveUp: '上移', moveDown: '下移', delete: '删除', avatarEmpty: '未上传，显示联系人首字', avatarUploaded: '已上传头像',
+          typingShow: '点击显示对方正在输入提示', typingHide: '点击隐藏对方正在输入提示', noMessages: '没有识别到消息，请检查说话人标记或光冒号格式。',
+          parsed: (count) => `已识别并排版 ${count} 条消息。`, parsedIgnored: (count) => `已排版 ${count} 条消息；首条消息前无法识别的文字未导入。`, swapped: '双方位置已交换。',
+          imageProcessing: '正在处理图片…', imageAdded: '图片消息已添加。', imageReplaced: '图片消息已替换。', imageFailed: '图片处理失败。', unreadableImage: '有一张图片消息无法读取。',
+          pngFailed: 'PNG 生成失败，请换用最新版浏览器重试。', pngDone: 'PNG 已导出。', imageNotReady: '图片尚未准备好，无法导出。', jsonSaved: '对话 JSON 已保存。', jsonRestored: 'JSON 已恢复。', jsonInvalid: '无法读取这个 JSON 文件。',
+          copyMissing: '这个对话副本已经不存在。', copyInvalid: '链接中的对话副本无法读取。', copyTooLarge: '图片数据较大，浏览器无法直接复制；请先保存 JSON。', copied: '当前对话已复制到新标签页。', popupBlocked: '浏览器阻止了新标签页，请允许此页面打开弹窗。',
+          avatarUpdated: '头像已更新。', avatarFailed: '头像上传失败。', avatarRemoved: '头像已移除，恢复为联系人首字。', avatarUnreadable: '头像图片无法读取，已恢复为联系人首字。', invalidImageType: '请选择 JPG、PNG、WebP 或 GIF 图片。', imageTooLarge: '图片不能超过 40 MB。', avatarTooLarge: '头像图片不能超过 20 MB。', imageDimensions: '图片尺寸无法读取。', imageCompressFailed: '浏览器无法压缩这张图片。', fileReadFailed: '无法读取这个图片文件。', imageDecodeFailed: '图片格式无法识别。', processedSaveFailed: '无法保存处理后的图片。', overflow: '消息超出可见区域，请减少内容'
+        },
+        en: {
+          documentTitle: 'Fake Message Screenshot Generator', eyebrow: 'Offline screenshot studio', title: 'Fake Message Screenshot Generator',
+          subtitle: 'Edit the conversation, preview it live, and export a high-resolution PNG. Everything stays in this browser and works without a server or installation.',
+          offlineBadge: 'Single file · Fully offline', bulkTitle: 'Paste conversation', bulkNote: 'Supports any two speakers, alternating colon-only lines, dates, and relative times. Speaker labels never appear inside bubbles.',
+          conversationText: 'Conversation text', parseButton: 'Parse and replace messages', swapButton: 'Swap participants', topTitle: 'Header', topNote: 'Edit the status-bar time, contact, and network information.',
+          statusTime: 'Status-bar time', network: 'Network', battery: 'Battery', contactName: 'Contact name', avatar: 'Contact avatar', chooseImage: 'Choose image', removeAvatar: 'Remove avatar', language: 'Display language',
+          messagesTitle: 'Messages', messagesNote: 'Sent messages are blue on the right; received messages are gray on the left. Text is preserved exactly.', topSeparator: 'Top time separator', normalizeTime: '↻ Normalize time', normalizeTimeTitle: 'Normalize time', timeNormalized: 'Time normalized for the current language.', timeReset: 'The original value was not recognized, so the default time was restored.', unsentContent: 'Unsent message content', emptyDefault: 'Leave empty for default',
+          deliveryLabel: 'Last blue message status', hidden: 'Hidden', read: 'Read', delivered: 'Delivered', addMessage: '＋ Add message', sendImage: '＋ Send image', addSeparator: '＋ Add time separator', typingIndicator: 'Show typing indicator',
+          filesTitle: 'Files and copies', filesNote: 'Save JSON to restore or manage multiple versions later.', saveJson: 'Save JSON', loadJson: 'Restore JSON', duplicate: 'Duplicate in new tab', howTo: 'How to use',
+          help1: 'Paste a conversation with speaker labels, colon-only lines, or timestamp lines and it will be parsed automatically.', help2: 'You can also edit the contact, time, network, and individual messages, or insert a local image.', help3: 'Use ↑ and ↓ to reorder an item, or Delete to remove it.', help4: 'Choose Export PNG to save a 786 × 1704 screenshot.', help5: 'Save JSON to back up the conversation and restore it later.', help6: 'Duplicate in new tab creates an independent copy for making several screenshots.', privacy: 'Please avoid impersonation, misleading audiences, or exposing real private information when sharing simulated conversations.',
+          previewTitle: 'Live preview', previewNote: 'The preview and PNG export use the same canvas.', exportPng: 'Export PNG', resetAll: 'Clear and reset', resetConfirm: 'Clear the current edits and restore all defaults?', resetDone: 'Default state restored.', sent: 'Sent', received: 'Received', timeKind: 'Time', messagePlaceholder: 'Enter message text',
+          replaceImage: 'Replace image', image: 'Image', moveUp: 'Move up', moveDown: 'Move down', delete: 'Delete', avatarEmpty: 'No image — using contact initial', avatarUploaded: 'Avatar uploaded',
+          typingShow: 'Click to show typing indicator', typingHide: 'Click to hide typing indicator', noMessages: 'No messages found. Check the speaker labels or colon-only format.',
+          parsed: (count) => `Parsed and arranged ${count} messages.`, parsedIgnored: (count) => `Parsed ${count} messages; unrecognized text before the first message was skipped.`, swapped: 'Participants swapped.',
+          imageProcessing: 'Processing image…', imageAdded: 'Image message added.', imageReplaced: 'Image message replaced.', imageFailed: 'Image processing failed.', unreadableImage: 'An image message could not be read.',
+          pngFailed: 'PNG generation failed. Try a current browser.', pngDone: 'PNG exported.', imageNotReady: 'An image is not ready, so the PNG cannot be exported.', jsonSaved: 'Conversation JSON saved.', jsonRestored: 'JSON restored.', jsonInvalid: 'This JSON file could not be read.',
+          copyMissing: 'This conversation copy no longer exists.', copyInvalid: 'The conversation copy in this link could not be read.', copyTooLarge: 'The image data is too large to duplicate directly. Save JSON instead.', copied: 'Conversation duplicated in a new tab.', popupBlocked: 'The browser blocked the new tab. Allow pop-ups for this page.',
+          avatarUpdated: 'Avatar updated.', avatarFailed: 'Avatar upload failed.', avatarRemoved: 'Avatar removed; using the contact initial.', avatarUnreadable: 'The avatar could not be read; using the contact initial.', invalidImageType: 'Choose a JPG, PNG, WebP, or GIF image.', imageTooLarge: 'Images must be 40 MB or smaller.', avatarTooLarge: 'Avatar images must be 20 MB or smaller.', imageDimensions: 'The image dimensions could not be read.', imageCompressFailed: 'This browser could not compress the image.', fileReadFailed: 'The image file could not be read.', imageDecodeFailed: 'The image format could not be decoded.', processedSaveFailed: 'The processed image could not be saved.', overflow: 'Messages exceed the visible area'
+        }
+      });
+
       const DEFAULT_STATE = Object.freeze({
-        version: 3,
+        version: 4,
+        language: 'zh',
+        participants: { sent: 'B', received: 'TJ' },
         contactName: 'TJ',
         statusTime: '9:41',
         avatarImage: '',
         avatarFileName: '',
         network: '5G',
         battery: 82,
-        timeSeparator: 'Today 5:13 AM',
+        timeSeparator: '今天 5:13',
+        timeSeparatorSystem: true,
         composerText: '',
         deliveryStatus: 'none',
         typingIndicator: false,
         messages: [
-          { type: 'message', sender: 'TJ', text: 'You said my comms encryption had twenty-three bugs.' },
-          { type: 'message', sender: 'B', text: 'Yes' },
-          { type: 'message', sender: 'B', text: 'T tried to fix some of them.' },
-          { type: 'message', sender: 'TJ', text: 'How many are left?' },
-          { type: 'message', sender: 'B', text: 'Fifty-five.' }
+          { type: 'message', direction: 'received', text: 'You said my comms encryption had twenty-three bugs.' },
+          { type: 'message', direction: 'sent', text: 'Yes' },
+          { type: 'message', direction: 'sent', text: 'T tried to fix some of them.' },
+          { type: 'message', direction: 'received', text: 'How many are left?' },
+          { type: 'message', direction: 'sent', text: 'Fifty-five.' }
         ]
       });
 
@@ -741,7 +794,7 @@
         state.avatarFileName = '';
         syncAvatarImage();
         changed();
-        showToast('头像图片无法读取，已恢复为首字母。');
+        showToast(t('avatarUnreadable'));
       });
       let toastTimer = 0;
       let renderQueued = false;
@@ -757,27 +810,43 @@
         if (!value || typeof value !== 'object') throw new Error('JSON 内容不是有效的对话配置。');
         if (!Array.isArray(value.messages)) throw new Error('JSON 中缺少 messages 数组。');
 
+        const legacyDirection = (item) => {
+          if (item && (item.direction === 'sent' || item.direction === 'received')) return item.direction;
+          return item && item.sender === 'B' ? 'sent' : 'received';
+        };
+        const participantValue = value.participants && typeof value.participants === 'object' ? value.participants : {};
+
         return {
-          version: 3,
+          version: 4,
+          language: value.language === 'en' ? 'en' : 'zh',
+          participants: {
+            sent: typeof participantValue.sent === 'string' && participantValue.sent.trim() ? participantValue.sent.slice(0, 80) : 'B',
+            received: typeof participantValue.received === 'string' && participantValue.received.trim() ? participantValue.received.slice(0, 80) : 'TJ'
+          },
           contactName: typeof value.contactName === 'string' ? value.contactName.slice(0, 36) : 'TJ',
           statusTime: typeof value.statusTime === 'string' ? value.statusTime.slice(0, 8) : '9:41',
           avatarImage: typeof value.avatarImage === 'string' && /^data:image\/(?:jpeg|png|webp);base64,/i.test(value.avatarImage) && value.avatarImage.length <= 1500000 ? value.avatarImage : '',
           avatarFileName: typeof value.avatarFileName === 'string' ? value.avatarFileName.slice(0, 120) : '',
           network: value.network === 'wifi' ? 'wifi' : '5G',
           battery: Math.max(1, Math.min(100, Number(value.battery) || 82)),
-          timeSeparator: typeof value.timeSeparator === 'string' && value.timeSeparator.trim() ? value.timeSeparator.slice(0, 60) : 'Today 5:13 AM',
+          timeSeparator: typeof value.timeSeparator === 'string' && value.timeSeparator.trim() ? value.timeSeparator.slice(0, 60) : (value.language === 'en' ? 'Today 5:13 AM' : '今天 5:13'),
+          timeSeparatorSystem: value.timeSeparatorSystem !== false,
           composerText: typeof value.composerText === 'string' ? value.composerText.slice(0, 500) : '',
           deliveryStatus: value.deliveryStatus === 'read' || value.deliveryStatus === 'delivered' ? value.deliveryStatus : 'none',
           typingIndicator: value.typingIndicator === true,
           messages: value.messages.slice(0, 100).map((item) => {
             if (item && item.type === 'separator') {
-              return { type: 'separator', text: typeof item.text === 'string' ? item.text.replace(/\r?\n/g, ' ').slice(0, 120) : '' };
+              return {
+                type: 'separator',
+                text: typeof item.text === 'string' ? item.text.replace(/\r?\n/g, ' ').slice(0, 120) : '',
+                systemGenerated: item.systemGenerated === true
+              };
             }
             if (item && item.type === 'image' && typeof item.imageData === 'string'
               && /^data:image\/(?:jpeg|png|webp);base64,/i.test(item.imageData) && item.imageData.length <= 12000000) {
               return {
                 type: 'image',
-                sender: item.sender === 'B' ? 'B' : 'TJ',
+                direction: legacyDirection(item),
                 imageData: item.imageData,
                 imageName: typeof item.imageName === 'string' ? item.imageName.slice(0, 160) : '图片',
                 width: Math.max(1, Math.min(IMAGE_MESSAGE_SETTINGS.COMPRESSION_MAX_DIMENSION, Math.round(Number(item.width) || 1))),
@@ -786,7 +855,7 @@
             }
             return {
               type: 'message',
-              sender: item && item.sender === 'B' ? 'B' : 'TJ',
+              direction: legacyDirection(item),
               text: item && typeof item.text === 'string' ? item.text.slice(0, 5000) : ''
             };
           })
@@ -810,7 +879,34 @@
         try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch (_) { /* file URLs may restrict storage */ }
       }
 
+      function t(key) {
+        return I18N[state.language] && I18N[state.language][key] !== undefined ? I18N[state.language][key] : I18N.zh[key] || key;
+      }
+
+      function applyLanguage() {
+        document.documentElement.lang = state.language === 'en' ? 'en' : 'zh-CN';
+        document.title = t('documentTitle');
+        document.querySelectorAll('[data-i18n]').forEach((element) => {
+          const value = t(element.dataset.i18n);
+          if (typeof value === 'string') element.textContent = value;
+        });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach((element) => {
+          element.placeholder = t(element.dataset.i18nPlaceholder);
+        });
+        const deliveryOptions = $('#deliveryStatus').options;
+        deliveryOptions[0].textContent = t('hidden');
+        deliveryOptions[1].textContent = t('read');
+        deliveryOptions[2].textContent = t('delivered');
+        $('#timeExamples').textContent = state.language === 'zh'
+          ? '今天 5:13 / 昨天 23:42 / 周日 0:11 / 4月5日 周日 0:11'
+          : 'Today 5:13 AM / Yesterday 11:42 PM / Sun, Apr 5 at 12:11 AM';
+        $('#timeSeparator').placeholder = state.language === 'zh' ? '今天 5:13' : 'Today 5:13 AM';
+        $('#displayLanguage').setAttribute('aria-label', t('language'));
+      }
+
       function syncTopFields() {
+        applyLanguage();
+        $('#displayLanguage').value = state.language;
         $('#contactName').value = state.contactName;
         $('#statusTime').value = state.statusTime;
         $('#avatarFile').value = '';
@@ -827,12 +923,12 @@
       function syncTypingIndicatorButton() {
         const button = $('#toggleTypingIndicator');
         button.setAttribute('aria-pressed', String(state.typingIndicator));
-        button.title = state.typingIndicator ? '点击隐藏对方正在输入提示' : '点击显示对方正在输入提示';
+        button.title = state.typingIndicator ? t('typingHide') : t('typingShow');
       }
 
       function syncAvatarImage() {
         const source = state.avatarImage || '';
-        $('#avatarStatus').textContent = source ? (state.avatarFileName || '已上传头像') : '未上传，显示联系人首字母';
+        $('#avatarStatus').textContent = source ? (state.avatarFileName || t('avatarUploaded')) : t('avatarEmpty');
         $('#removeAvatar').disabled = !source;
         if (source === uploadedAvatarSource) return;
         uploadedAvatarSource = source;
@@ -847,23 +943,29 @@
           const isSeparator = item.type === 'separator';
           const isImage = item.type === 'image';
           const card = document.createElement('article');
-          card.className = `message-card ${isSeparator ? 'is-time' : item.sender === 'B' ? 'is-b' : 'is-tj'}`;
+          card.className = `message-card ${isSeparator ? 'is-time' : item.direction === 'sent' ? 'is-b' : 'is-tj'}`;
           card.dataset.index = String(index);
 
           let leadingControl;
           if (isSeparator) {
             leadingControl = document.createElement('div');
             leadingControl.className = 'entry-kind';
-            leadingControl.textContent = 'Time';
+            leadingControl.textContent = t('timeKind');
           } else {
             const sender = document.createElement('select');
             sender.className = 'sender-select';
-            sender.setAttribute('aria-label', `第 ${index + 1} 条消息的发送者`);
-            sender.innerHTML = '<option value="B">B</option><option value="TJ">TJ</option>';
-            sender.value = item.sender;
+            sender.setAttribute('aria-label', `${t('messagesTitle')} ${index + 1}`);
+            const sentOption = document.createElement('option');
+            sentOption.value = 'sent';
+            sentOption.textContent = t('sent');
+            const receivedOption = document.createElement('option');
+            receivedOption.value = 'received';
+            receivedOption.textContent = t('received');
+            sender.append(sentOption, receivedOption);
+            sender.value = item.direction;
             sender.addEventListener('change', () => {
-              state.messages[index].sender = sender.value === 'B' ? 'B' : 'TJ';
-              card.className = `message-card ${sender.value === 'B' ? 'is-b' : 'is-tj'}`;
+              state.messages[index].direction = sender.value === 'sent' ? 'sent' : 'received';
+              card.className = `message-card ${sender.value === 'sent' ? 'is-b' : 'is-tj'}`;
               changed();
             });
             leadingControl = sender;
@@ -882,12 +984,12 @@
             meta.className = 'image-message-meta';
             const name = document.createElement('span');
             name.className = 'image-message-name';
-            name.textContent = `${item.imageName || '图片'} · ${item.width} × ${item.height}`;
-            name.title = item.imageName || '图片';
+            name.textContent = `${item.imageName || t('image')} · ${item.width} × ${item.height}`;
+            name.title = item.imageName || t('image');
             const replace = document.createElement('button');
             replace.type = 'button';
             replace.className = 'button';
-            replace.textContent = '替换图片';
+            replace.textContent = t('replaceImage');
             const fileInput = document.createElement('input');
             fileInput.type = 'file';
             fileInput.accept = 'image/jpeg,image/png,image/webp,image/gif';
@@ -906,24 +1008,33 @@
             if (isSeparator) text.type = 'text';
             text.className = `message-text${isSeparator ? ' time-separator-text' : ''}`;
             text.value = item.text;
-            text.placeholder = isSeparator ? 'Today 11:42 PM' : '输入消息文本';
+            text.placeholder = isSeparator ? (state.language === 'zh' ? '今天 23:42' : 'Today 11:42 PM') : t('messagePlaceholder');
             text.maxLength = isSeparator ? 120 : 5000;
             text.setAttribute('aria-label', `第 ${index + 1} 条${isSeparator ? '时间分隔' : '消息'}文本`);
             text.addEventListener('input', () => {
               state.messages[index].text = text.value;
+              if (isSeparator) state.messages[index].systemGenerated = false;
               changed();
             });
+            if (isSeparator) {
+              text.addEventListener('change', () => {
+                if (syncTopSeparatorToFirstInsertedTime()) changed();
+              });
+            }
             contentControl = text;
           }
 
           const actions = document.createElement('div');
           actions.className = 'message-actions';
 
-          const up = actionButton('↑', '上移', index === 0, () => moveMessage(index, -1));
-          const down = actionButton('↓', '下移', index === state.messages.length - 1, () => moveMessage(index, 1));
-          const remove = actionButton('删除', '删除', false, () => deleteMessage(index));
+          const up = actionButton('↑', t('moveUp'), index === 0, () => moveMessage(index, -1));
+          const down = actionButton('↓', t('moveDown'), index === state.messages.length - 1, () => moveMessage(index, 1));
+          const normalize = isSeparator ? actionButton('↻', t('normalizeTimeTitle'), false, () => normalizeMessageSeparator(index)) : null;
+          const remove = actionButton(t('delete'), t('delete'), false, () => deleteMessage(index));
           remove.classList.add('delete');
-          actions.append(up, down, remove);
+          actions.append(up, down);
+          if (normalize) actions.append(normalize);
+          actions.append(remove);
           card.append(leadingControl, contentControl, actions);
           messagesList.append(card);
         });
@@ -958,7 +1069,7 @@
       }
 
       function addMessage() {
-        state.messages.push({ type: 'message', sender: nextMessageSender(), text: '' });
+        state.messages.push({ type: 'message', direction: nextMessageDirection(), text: '' });
         renderMessageEditor();
         changed();
         const newest = messagesList.lastElementChild;
@@ -966,29 +1077,29 @@
         newest?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
 
-      function nextMessageSender() {
+      function nextMessageDirection() {
         const last = state.messages.slice().reverse().find((item) => item.type === 'message' || item.type === 'image');
-        return !last || last.sender === 'B' ? 'TJ' : 'B';
+        return !last || last.direction === 'sent' ? 'received' : 'sent';
       }
 
       async function addImageMessage(file) {
         try {
-          showToast('正在处理图片…');
+          showToast(t('imageProcessing'));
           const image = await compressImageFile(file);
-          state.messages.push({ type: 'image', sender: nextMessageSender(), ...image });
+          state.messages.push({ type: 'image', direction: nextMessageDirection(), ...image });
           getMessageImageRecord(image.imageData);
           renderMessageEditor();
           changed();
           messagesList.lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          showToast('图片消息已添加。');
+          showToast(t('imageAdded'));
         } catch (error) {
-          showToast(error instanceof Error ? error.message : '图片处理失败。');
+          showToast(error instanceof Error ? error.message : t('imageFailed'));
         }
       }
 
       async function replaceImageMessage(index, file) {
         try {
-          showToast('正在处理图片…');
+          showToast(t('imageProcessing'));
           const image = await compressImageFile(file);
           if (!state.messages[index] || state.messages[index].type !== 'image') return;
           messageImageCache.delete(state.messages[index].imageData);
@@ -996,14 +1107,14 @@
           getMessageImageRecord(image.imageData);
           renderMessageEditor();
           changed();
-          showToast('图片消息已替换。');
+          showToast(t('imageReplaced'));
         } catch (error) {
-          showToast(error instanceof Error ? error.message : '图片处理失败。');
+          showToast(error instanceof Error ? error.message : t('imageFailed'));
         }
       }
 
       function addTimeSeparator() {
-        state.messages.push({ type: 'separator', text: 'Today 11:42 PM' });
+        state.messages.push({ type: 'separator', text: state.language === 'zh' ? '今天 23:42' : 'Today 11:42 PM', systemGenerated: false });
         renderMessageEditor();
         changed();
         const newest = messagesList.lastElementChild;
@@ -1017,40 +1128,357 @@
         changed();
       }
 
-      function parseBulkConversation(showResult = true) {
-        const source = $('#bulkConversation').value.replace(/\r\n?/g, '\n');
-        const lines = source.split('\n');
+      const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const MONTH_NAMES_FULL = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const WEEKDAYS_ZH = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+      function monthIndexFromName(value) {
+        const normalized = String(value || '').toLowerCase();
+        return MONTH_NAMES.findIndex((shortName, index) => shortName.toLowerCase() === normalized
+          || MONTH_NAMES_FULL[index].toLowerCase() === normalized);
+      }
+
+      function parseAbsoluteTime(line, baseDate = new Date()) {
+        const match = line.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+        if (!match) return null;
+        let hour = Number(match[1]);
+        const minute = Number(match[2]);
+        const meridiem = match[3] ? match[3].toUpperCase() : '';
+        if (minute > 59 || (meridiem && (hour < 1 || hour > 12)) || (!meridiem && hour > 23)) return null;
+        if (meridiem) hour = hour % 12 + (meridiem === 'PM' ? 12 : 0);
+        const result = new Date(baseDate);
+        result.setHours(hour, minute, 0, 0);
+        return result;
+      }
+
+      function parseRelativeTime(line) {
+        const normalized = line.trim();
+        let match = normalized.match(/^(\d+)\s+(minute|minutes|hour|hours)\s+later$/i);
+        if (match) return Number(match[1]) * (/hour/i.test(match[2]) ? 60 : 1);
+        match = normalized.match(/^(one|two)\s+and\s+a\s+half\s+hours?\s+later$/i);
+        if (match) return (match[1].toLowerCase() === 'two' ? 150 : 90);
+        match = normalized.match(/^(\d+)\s*(分钟|小时)\s*(?:后|之后)$/u);
+        if (match) return Number(match[1]) * (match[2] === '小时' ? 60 : 1);
+        if (/^半\s*小时\s*(?:后|之后)$/u.test(normalized)) return 30;
+        match = normalized.match(/^([一两二])\s*小时\s*(?:后|之后)$/u);
+        if (match) return (match[1] === '一' ? 60 : 120);
+        match = normalized.match(/^([一两二])\s*个?半\s*小时\s*(?:后|之后)$/u);
+        if (match) return (match[1] === '一' ? 90 : 150);
+        return null;
+      }
+
+      function parseDateLine(line, baseDate = new Date()) {
+        const trimmed = line.trim();
+        let match = trimmed.match(/^([A-Za-z]+)\s+(\d{1,2})$/);
+        let month;
+        let day;
+        if (match) {
+          month = monthIndexFromName(match[1]);
+          day = Number(match[2]);
+          if (month < 0) return null;
+        } else {
+          match = trimmed.match(/^(\d{1,2})\s*月\s*(\d{1,2})\s*日?$/u);
+          if (!match) return null;
+          month = Number(match[1]) - 1;
+          day = Number(match[2]);
+        }
+        const result = new Date(baseDate);
+        result.setFullYear(new Date().getFullYear(), month, day);
+        result.setSeconds(0, 0);
+        if (result.getMonth() !== month || result.getDate() !== day) return null;
+        return result;
+      }
+
+      function parseDisplayedTimestamp(value, language = state.language) {
+        const text = String(value || '').trim();
+        const timeMatch = text.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+        if (!timeMatch) return null;
+        const now = new Date();
+        let base = new Date(now);
+        base.setSeconds(0, 0);
+        const englishDate = text.match(/(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat),?\s+([A-Za-z]+)\s+(\d{1,2})/i)
+          || text.match(/\b([A-Za-z]+)\s+(\d{1,2})\b/i);
+        const chineseDate = text.match(/(\d{1,2})\s*月\s*(\d{1,2})\s*日/u);
+        if (/\bYesterday\b/i.test(text) || /^昨天/u.test(text)) base.setDate(base.getDate() - 1);
+        else if (englishDate) {
+          const month = monthIndexFromName(englishDate[1]);
+          if (month >= 0) base.setFullYear(now.getFullYear(), month, Number(englishDate[2]));
+        } else if (chineseDate) {
+          base.setFullYear(now.getFullYear(), Number(chineseDate[1]) - 1, Number(chineseDate[2]));
+        } else if (language === 'zh') {
+          const weekday = WEEKDAYS_ZH.findIndex((label) => text.startsWith(label));
+          if (weekday >= 0) {
+            const daysAgo = (now.getDay() - weekday + 7) % 7;
+            base.setDate(base.getDate() - daysAgo);
+          }
+        }
+        return parseAbsoluteTime(`${timeMatch[1]}:${timeMatch[2]}${timeMatch[3] ? ` ${timeMatch[3]}` : ''}`, base);
+      }
+
+      function parseAbsoluteTimestampLine(line) {
+        const trimmed = line.trim();
+        const isEnglish = /^(?:Today|Yesterday)\s+\d{1,2}:\d{2}\s*(?:AM|PM)$/i.test(trimmed)
+          || /^(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat),?\s+[A-Za-z]+\s+\d{1,2}\s+at\s+\d{1,2}:\d{2}\s*(?:AM|PM)$/i.test(trimmed);
+        const isChinese = /^(?:今天|昨天|周[日一二三四五六])\s+\d{1,2}:\d{2}$/u.test(trimmed)
+          || /^\d{1,2}月\d{1,2}日\s+周[日一二三四五六]\s+\d{1,2}:\d{2}$/u.test(trimmed);
+        return isEnglish || isChinese ? parseDisplayedTimestamp(trimmed, isEnglish ? 'en' : 'zh') : null;
+      }
+
+      function calendarDayDifference(earlier, later) {
+        const start = new Date(earlier.getFullYear(), earlier.getMonth(), earlier.getDate());
+        const end = new Date(later.getFullYear(), later.getMonth(), later.getDate());
+        return Math.round((end - start) / 86400000);
+      }
+
+      function formatClock(date, language = state.language) {
+        const minute = String(date.getMinutes()).padStart(2, '0');
+        if (language === 'zh') return `${date.getHours()}:${minute}`;
+        const hour = date.getHours() % 12 || 12;
+        return `${hour}:${minute} ${date.getHours() >= 12 ? 'PM' : 'AM'}`;
+      }
+
+      function formatSystemTime(date, language = state.language) {
+        const now = new Date();
+        const daysAgo = calendarDayDifference(date, now);
+        const clock = formatClock(date, language);
+        if (language === 'zh') {
+          if (daysAgo === 0) return `今天 ${clock}`;
+          if (daysAgo === 1) return `昨天 ${clock}`;
+          if (daysAgo >= 2 && daysAgo <= 6) return `${WEEKDAYS_ZH[date.getDay()]} ${clock}`;
+          return `${date.getMonth() + 1}月${date.getDate()}日 ${WEEKDAYS_ZH[date.getDay()]} ${clock}`;
+        }
+        if (daysAgo === 0) return `Today ${clock}`;
+        if (daysAgo === 1) return `Yesterday ${clock}`;
+        const weekday = date.toLocaleDateString('en-US', { weekday: 'short' });
+        return `${weekday}, ${MONTH_NAMES[date.getMonth()]} ${date.getDate()} at ${clock}`;
+      }
+
+      function parseSpeakerLine(line) {
+        const match = line.match(/^\s*([^:：\r\n]{1,80}?)\s*[:：][ \t]?(.*)$/u);
+        if (!match || !match[1].trim()) return null;
+        return { speaker: match[1].trim(), text: match[2] };
+      }
+
+      function parseImportedText(source) {
+        const lines = source.replace(/\r\n?/g, '\n').split('\n');
         const parsed = [];
+        const speakers = new Map();
+        const speakerNames = [];
         let current = null;
+        let currentTime = parseDisplayedTimestamp(state.timeSeparator) || new Date();
+        let dateSpecified = false;
+        let bareIndex = 0;
+        let messageCount = 0;
         let ignoredBeforeFirstMarker = 0;
 
+        function appendSeparatorOrTop(date) {
+          const text = formatSystemTime(date);
+          if (messageCount === 0) {
+            state.timeSeparator = text;
+            state.timeSeparatorSystem = true;
+          } else if (parsed.length && parsed[parsed.length - 1].type === 'separator' && parsed[parsed.length - 1].systemGenerated) {
+            parsed[parsed.length - 1].text = text;
+          } else {
+            parsed.push({ type: 'separator', text, systemGenerated: true });
+          }
+          current = null;
+        }
+
+        function addMessage(direction, text) {
+          current = { type: 'message', direction, text };
+          parsed.push(current);
+          messageCount += 1;
+        }
+
         for (const line of lines) {
-          const match = line.match(/^\s*(TJ|B)\s*[:：][ \t]?(.*)$/i);
-          if (match) {
-            current = { type: 'message', sender: match[1].toUpperCase() === 'B' ? 'B' : 'TJ', text: match[2] };
-            parsed.push(current);
+          const trimmed = line.trim();
+          if (!trimmed) {
+            if (current) current.text += '\n';
+            continue;
+          }
+
+          const displayedTimestamp = parseAbsoluteTimestampLine(trimmed);
+          if (displayedTimestamp) {
+            currentTime = displayedTimestamp;
+            dateSpecified = true;
+            appendSeparatorOrTop(currentTime);
+            continue;
+          }
+
+          const date = parseDateLine(trimmed, currentTime);
+          if (date) {
+            currentTime = date;
+            dateSpecified = true;
+            appendSeparatorOrTop(currentTime);
+            continue;
+          }
+
+          const absolute = parseAbsoluteTime(trimmed, dateSpecified ? currentTime : new Date());
+          if (absolute) {
+            currentTime = absolute;
+            appendSeparatorOrTop(currentTime);
+            continue;
+          }
+
+          const relativeMinutes = parseRelativeTime(trimmed);
+          if (relativeMinutes !== null) {
+            currentTime = new Date(currentTime.getTime() + relativeMinutes * 60000);
+            appendSeparatorOrTop(currentTime);
+            continue;
+          }
+
+          const speakerLine = parseSpeakerLine(line);
+          if (speakerLine) {
+            const key = speakerLine.speaker.toLocaleLowerCase();
+            if (!speakers.has(key) && speakers.size < 2) {
+              const direction = speakers.size === 0 ? 'sent' : 'received';
+              speakers.set(key, direction);
+              speakerNames.push(speakerLine.speaker);
+            }
+            if (speakers.has(key)) {
+              addMessage(speakers.get(key), speakerLine.text);
+              continue;
+            }
+          }
+
+          const bare = line.match(/^\s*[:：][ \t]?(.*)$/u);
+          if (bare) {
+            addMessage(bareIndex % 2 === 0 ? 'sent' : 'received', bare[1]);
+            bareIndex += 1;
           } else if (current) {
             current.text += `\n${line}`;
-          } else if (line.trim()) {
+          } else {
             ignoredBeforeFirstMarker += 1;
           }
         }
 
-        if (!parsed.length) {
-          if (showResult) showToast('没有识别到消息，请让每条消息以 TJ: 或 B: 开头。');
+        return { parsed, messageCount, ignoredBeforeFirstMarker, speakerNames };
+      }
+
+      function parseBulkConversation(showResult = true) {
+        const result = parseImportedText($('#bulkConversation').value);
+        if (!result.messageCount) {
+          if (showResult) showToast(t('noMessages'));
           return false;
         }
-
-        state.messages = parsed;
+        if (result.speakerNames[0]) {
+          const previousSent = state.participants.sent;
+          state.participants.sent = result.speakerNames[0];
+          if (!result.speakerNames[1] && state.participants.received.toLocaleLowerCase() === result.speakerNames[0].toLocaleLowerCase()) {
+            state.participants.received = previousSent.toLocaleLowerCase() === result.speakerNames[0].toLocaleLowerCase() ? t('received') : previousSent;
+          }
+        }
+        if (result.speakerNames[1]) state.participants.received = result.speakerNames[1];
+        state.messages = result.parsed;
+        syncTopSeparatorToFirstInsertedTime();
         messageImageCache.clear();
+        $('#timeSeparator').value = state.timeSeparator;
         renderMessageEditor();
         changed();
-        if (showResult) {
-          showToast(ignoredBeforeFirstMarker
-            ? `已排版 ${parsed.length} 条消息；首个标记前的文字未导入。`
-            : `已识别并排版 ${parsed.length} 条消息。`);
-        }
+        if (showResult) showToast(result.ignoredBeforeFirstMarker ? t('parsedIgnored')(result.messageCount) : t('parsed')(result.messageCount));
         return true;
+      }
+
+      function swapParticipants() {
+        state.messages.forEach((item) => {
+          if (item.type === 'message' || item.type === 'image') item.direction = item.direction === 'sent' ? 'received' : 'sent';
+        });
+        [state.participants.sent, state.participants.received] = [state.participants.received, state.participants.sent];
+        renderMessageEditor();
+        changed();
+        showToast(t('swapped'));
+      }
+
+      function defaultSeparatorDate() {
+        const date = new Date();
+        date.setHours(5, 13, 0, 0);
+        return date;
+      }
+
+      function parseSeparatorForNormalization(value) {
+        const source = String(value || '').trim();
+        if (!source) return null;
+        return parseAbsoluteTimestampLine(source)
+          || parseAbsoluteTime(source, new Date())
+          || parseDateLine(source, defaultSeparatorDate());
+      }
+
+      function syncTopSeparatorToFirstInsertedTime() {
+        const firstSeparator = state.messages.find((item) => item.type === 'separator' && parseSeparatorForNormalization(item.text));
+        if (!firstSeparator) return false;
+        const lowerDate = parseSeparatorForNormalization(firstSeparator.text);
+        if (!lowerDate) return false;
+
+        const currentTop = parseSeparatorForNormalization(state.timeSeparator);
+        const nextTop = new Date(lowerDate);
+        if (currentTop) nextTop.setHours(currentTop.getHours(), currentTop.getMinutes(), 0, 0);
+        else nextTop.setTime(lowerDate.getTime() - 60000);
+        if (nextTop >= lowerDate) nextTop.setTime(lowerDate.getTime() - 60000);
+
+        const formatted = formatSystemTime(nextTop);
+        const changedValue = formatted !== state.timeSeparator || state.timeSeparatorSystem !== true;
+        state.timeSeparator = formatted;
+        state.timeSeparatorSystem = true;
+        $('#timeSeparator').value = formatted;
+        return changedValue;
+      }
+
+      function normalizeTopSeparator() {
+        const parsed = parseSeparatorForNormalization(state.timeSeparator);
+        state.timeSeparator = formatSystemTime(parsed || defaultSeparatorDate());
+        state.timeSeparatorSystem = true;
+        $('#timeSeparator').value = state.timeSeparator;
+        changed();
+        showToast(t(parsed ? 'timeNormalized' : 'timeReset'));
+      }
+
+      function normalizeMessageSeparator(index) {
+        const item = state.messages[index];
+        if (!item || item.type !== 'separator') return;
+        const parsed = parseSeparatorForNormalization(item.text);
+        item.text = formatSystemTime(parsed || defaultSeparatorDate());
+        item.systemGenerated = true;
+        syncTopSeparatorToFirstInsertedTime();
+        renderMessageEditor();
+        changed();
+        showToast(t(parsed ? 'timeNormalized' : 'timeReset'));
+      }
+
+      function changeLanguage(language) {
+        const nextLanguage = language === 'en' ? 'en' : 'zh';
+        const previousLanguage = state.language;
+        const topDate = state.timeSeparatorSystem
+          ? parseDisplayedTimestamp(state.timeSeparator, previousLanguage)
+          : parseAbsoluteTimestampLine(state.timeSeparator);
+        const separatorDates = state.messages.map((item) => {
+          if (item.type !== 'separator') return null;
+          return item.systemGenerated
+            ? parseDisplayedTimestamp(item.text, previousLanguage)
+            : parseAbsoluteTimestampLine(item.text);
+        });
+        state.language = nextLanguage;
+        if (topDate) state.timeSeparator = formatSystemTime(topDate, nextLanguage);
+        state.messages.forEach((item, index) => {
+          if (separatorDates[index]) item.text = formatSystemTime(separatorDates[index], nextLanguage);
+        });
+        syncTopFields();
+        renderMessageEditor();
+        changed();
+      }
+
+      function resetAll() {
+        if (!window.confirm(t('resetConfirm'))) return;
+        try { localStorage.removeItem(storageKey); } catch (_) { /* file URLs may restrict storage */ }
+        state = clone(DEFAULT_STATE);
+        messageImageCache.clear();
+        $('#bulkConversation').value = '';
+        $('#newImageMessageFile').value = '';
+        $('#jsonFile').value = '';
+        $('#exportSize').value = '786x1704';
+        syncTopFields();
+        renderMessageEditor();
+        changed();
+        showToast(t('resetDone'));
       }
 
       function changed() {
@@ -1103,6 +1531,19 @@
       function setMessageFont(ctx, size) {
         ctx.font = `300 ${size}px "Helvetica Neue", Arial, sans-serif`;
         ctx.letterSpacing = '0.21px';
+      }
+
+      function containsEmoji(value) {
+        return /[\u{1F000}-\u{1FAFF}\u2600-\u27BF]/u.test(String(value));
+      }
+
+      function setContactNameFont(ctx, weight, size, value) {
+        if (containsEmoji(value)) {
+          ctx.font = `${size}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
+          ctx.letterSpacing = '0px';
+        } else {
+          setFont(ctx, weight, size);
+        }
       }
 
       function getGlyphMetrics(ctx, fallbackSize) {
@@ -1255,20 +1696,20 @@
           ctx.clip();
           ctx.drawImage(uploadedAvatar, sourceX, sourceY, sourceSize, sourceSize, 166.5, 59.5, 57, 57);
         } else {
-          const initial = Array.from(displayName.trim())[0] || '';
+          const initial = graphemes(displayName.trim())[0] || '';
           ctx.fillStyle = '#fff';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          setFont(ctx, 400, 21.5);
+          setContactNameFont(ctx, 400, 21.5, initial);
           ctx.fillText(initial.toLocaleUpperCase(), 195, 88.5);
         }
         ctx.restore();
 
-        setFont(ctx, 600, 15.5);
+        setContactNameFont(ctx, 600, 15.5, displayName);
         const maxName = 106;
         let name = displayName;
-        while (name && ctx.measureText(name).width > maxName) name = Array.from(name).slice(0, -1).join('');
-        if (name !== displayName && name) name = Array.from(name).slice(0, -1).join('') + '…';
+        while (name && ctx.measureText(name).width > maxName) name = graphemes(name).slice(0, -1).join('');
+        if (name !== displayName && name) name = graphemes(name).slice(0, -1).join('') + '…';
         const nameWidth = ctx.measureText(name).width;
         const pillWidth = Math.min(142, Math.max(57, nameWidth + 24));
         const pillX = 195 - pillWidth / 2;
@@ -1282,7 +1723,7 @@
         ctx.fillStyle = '#111';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        setFont(ctx, 600, 15.5);
+        setContactNameFont(ctx, 600, 15.5, name);
         ctx.fillText(name, 191, 132.5);
 
         ctx.strokeStyle = '#aaaeb4';
@@ -1310,9 +1751,10 @@
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#929296';
         const dated = value.match(/^(.+?)(\s+at\s+.*)$/i);
+        const chineseDated = value.match(/^(.+?周[日一二三四五六])(\s+\d{1,2}:\d{2})$/u);
         const relative = value.match(/^(\S+)(\s.*)?$/s);
-        const lead = dated ? dated[1] : relative ? relative[1] : value;
-        const rest = dated ? dated[2] : relative && relative[2] ? relative[2] : '';
+        const lead = dated ? dated[1] : chineseDated ? chineseDated[1] : relative ? relative[1] : value;
+        const rest = dated ? dated[2] : chineseDated ? chineseDated[2] : relative && relative[2] ? relative[2] : '';
         setFont(ctx, 600, 12);
         const leadWidth = ctx.measureText(lead).width;
         setFont(ctx, 400, 12);
@@ -1373,7 +1815,7 @@
           }, { once: true });
           image.addEventListener('error', () => {
             record.failed = true;
-            reject(new Error('有一张图片消息无法读取。'));
+            reject(new Error(t('unreadableImage')));
           }, { once: true });
         });
         record.promise.catch(() => { /* export reports unreadable images to the user */ });
@@ -1413,7 +1855,7 @@
       }
 
       function drawBubble(ctx, message, x, y, width, height, lines) {
-        const mine = message.sender === 'B';
+        const mine = message.direction === 'sent';
         const fill = mine ? '#0A84FF' : '#E9E9ED';
         const bubbleRadius = Math.min(21, height / 2);
         fillRoundedRect(ctx, x, y, width, height, bubbleRadius, fill);
@@ -1455,7 +1897,7 @@
       }
 
       function drawDeliveryStatus(ctx, status, y) {
-        const label = status === 'read' ? 'Read' : 'Delivered';
+        const label = status === 'read' ? t('read') : t('delivered');
         ctx.save();
         ctx.fillStyle = '#8E8E93';
         ctx.textAlign = 'right';
@@ -1473,7 +1915,7 @@
         let lastBlueIndex = -1;
 
         state.messages.forEach((item, index) => {
-          if ((item.type === 'message' || item.type === 'image') && item.sender === 'B') lastBlueIndex = index;
+          if ((item.type === 'message' || item.type === 'image') && item.direction === 'sent') lastBlueIndex = index;
         });
 
         ctx.save();
@@ -1492,7 +1934,7 @@
             drawSeparatorText(ctx, item.text, y);
           } else if (item.type === 'image') {
             const layout = measureImageMessage(item);
-            const mine = item.sender === 'B';
+            const mine = item.direction === 'sent';
             const x = mine ? DESIGN_W - 18 - layout.width : 18;
             drawImageMessage(ctx, item, x, y, layout);
             height = layout.height;
@@ -1501,10 +1943,10 @@
               height += 27;
             }
             if (next && next.type === 'separator') gap = 24;
-            else if (next && next.sender === item.sender) gap = 13;
+            else if (next && next.direction === item.direction) gap = 13;
           } else {
             const layout = measureMessage(ctx, item);
-            const mine = item.sender === 'B';
+            const mine = item.direction === 'sent';
             const x = mine ? DESIGN_W - 18 - layout.width : 18;
             drawBubble(ctx, item, x, y, layout.width, layout.height, layout.lines);
             height = layout.height;
@@ -1513,7 +1955,7 @@
               height += 27;
             }
             if (next && next.type === 'separator') gap = 24;
-            else if (next && next.sender === item.sender) gap = 13;
+            else if (next && next.direction === item.direction) gap = 13;
           }
 
           y += height + gap;
@@ -1617,7 +2059,7 @@
           ctx.textBaseline = 'alphabetic';
           setMessageFont(ctx, 16);
           const { ascent, descent } = getGlyphMetrics(ctx, 16);
-          ctx.fillText('iMessage', 99, 793.5 + (ascent - descent) / 2);
+          ctx.fillText(state.language === 'zh' ? 'iMessage信息' : 'iMessage', 99, 793.5 + (ascent - descent) / 2);
 
           ctx.strokeStyle = '#85898f';
           ctx.lineWidth = 1.2;
@@ -1670,7 +2112,7 @@
         const { width, height } = selectedSize();
         const overflow = renderToCanvas(canvas, width, height);
         $('#renderSize').textContent = `${width} × ${height} PNG`;
-        overflowWarning.textContent = overflow ? '消息超出可见区域，请减少内容' : '';
+        overflowWarning.textContent = overflow ? t('overflow') : '';
       }
 
       function downloadBlob(blob, filename) {
@@ -1695,21 +2137,21 @@
           renderPreview();
           canvas.toBlob((blob) => {
             if (!blob) {
-              showToast('PNG 生成失败，请换用最新版浏览器重试。');
+              showToast(t('pngFailed'));
               return;
             }
             downloadBlob(blob, `${safeFilename(state.contactName)}-Fake-Message.png`);
-            showToast('PNG 已导出。');
+            showToast(t('pngDone'));
           }, 'image/png');
         } catch (error) {
-          showToast(error instanceof Error ? error.message : '图片尚未准备好，无法导出。');
+          showToast(error instanceof Error ? error.message : t('imageNotReady'));
         }
       }
 
       function saveJson() {
         const json = JSON.stringify(state, null, 2);
         downloadBlob(new Blob([json], { type: 'application/json;charset=utf-8' }), `${safeFilename(state.contactName)}-conversation.json`);
-        showToast('对话 JSON 已保存。');
+        showToast(t('jsonSaved'));
       }
 
       async function loadJsonFile(file) {
@@ -1720,9 +2162,9 @@
           syncTopFields();
           renderMessageEditor();
           changed();
-          showToast('JSON 已恢复。');
+          showToast(t('jsonRestored'));
         } catch (error) {
-          showToast(error instanceof Error ? error.message : '无法读取这个 JSON 文件。');
+          showToast(error instanceof Error ? error.message : t('jsonInvalid'));
         } finally {
           $('#jsonFile').value = '';
         }
@@ -1761,7 +2203,7 @@
             state = savedCopy;
             return true;
           }
-          showToast('这个对话副本已经不存在。');
+          showToast(t('copyMissing'));
           return false;
         }
         const match = location.hash.match(/^#conversation=([A-Za-z0-9_-]+)$/);
@@ -1772,7 +2214,7 @@
           state = savedCopy || sanitizeState(decodeState(match[1]));
           return true;
         } catch (_) {
-          showToast('链接中的对话副本无法读取。');
+          showToast(t('copyInvalid'));
           return false;
         }
       }
@@ -1787,7 +2229,7 @@
         } catch (_) {
           const encoded = encodeState(state);
           if (encoded.length > 100000) {
-            showToast('图片数据较大，浏览器无法直接复制；请先保存 JSON。');
+            showToast(t('copyTooLarge'));
             return;
           }
           duplicateUrl = `${baseUrl}#conversation=${encoded}`;
@@ -1795,9 +2237,9 @@
         const newWindow = window.open(duplicateUrl, '_blank');
         if (newWindow) {
           newWindow.opener = null;
-          showToast('当前对话已复制到新标签页。');
+          showToast(t('copied'));
         } else {
-          showToast('浏览器阻止了新标签页，请允许此页面打开弹窗。');
+          showToast(t('popupBlocked'));
         }
       }
 
@@ -1805,7 +2247,7 @@
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.addEventListener('load', () => resolve(String(reader.result || '')));
-          reader.addEventListener('error', () => reject(new Error('无法读取这个图片文件。')));
+          reader.addEventListener('error', () => reject(new Error(t('fileReadFailed'))));
           reader.readAsDataURL(file);
         });
       }
@@ -1814,7 +2256,7 @@
         return new Promise((resolve, reject) => {
           const image = new Image();
           image.addEventListener('load', () => resolve(image));
-          image.addEventListener('error', () => reject(new Error('图片格式无法识别。')));
+          image.addEventListener('error', () => reject(new Error(t('imageDecodeFailed'))));
           image.src = source;
         });
       }
@@ -1827,7 +2269,7 @@
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.addEventListener('load', () => resolve(String(reader.result || '')));
-          reader.addEventListener('error', () => reject(new Error('无法保存处理后的图片。')));
+          reader.addEventListener('error', () => reject(new Error(t('processedSaveFailed'))));
           reader.readAsDataURL(blob);
         });
       }
@@ -1843,13 +2285,13 @@
       }
 
       async function compressImageFile(file) {
-        if (!/^image\/(?:jpeg|png|webp|gif)$/i.test(file.type)) throw new Error('请选择 JPG、PNG、WebP 或 GIF 图片。');
-        if (file.size > 40 * 1024 * 1024) throw new Error('图片不能超过 40 MB。');
+        if (!/^image\/(?:jpeg|png|webp|gif)$/i.test(file.type)) throw new Error(t('invalidImageType'));
+        if (file.size > 40 * 1024 * 1024) throw new Error(t('imageTooLarge'));
 
         const sourceImage = await decodeUploadImage(file);
         const sourceWidth = sourceImage.width || sourceImage.naturalWidth;
         const sourceHeight = sourceImage.height || sourceImage.naturalHeight;
-        if (!sourceWidth || !sourceHeight) throw new Error('图片尺寸无法读取。');
+        if (!sourceWidth || !sourceHeight) throw new Error(t('imageDimensions'));
         const scale = Math.min(1, IMAGE_MESSAGE_SETTINGS.COMPRESSION_MAX_DIMENSION / Math.max(sourceWidth, sourceHeight));
         const outputWidth = Math.max(1, Math.round(sourceWidth * scale));
         const outputHeight = Math.max(1, Math.round(sourceHeight * scale));
@@ -1864,7 +2306,7 @@
 
         let blob = await canvasToBlob(imageCanvas, 'image/webp', IMAGE_MESSAGE_SETTINGS.JPEG_WEBP_QUALITY);
         if (!blob) blob = await canvasToBlob(imageCanvas, 'image/jpeg', IMAGE_MESSAGE_SETTINGS.JPEG_WEBP_QUALITY);
-        if (!blob) throw new Error('浏览器无法压缩这张图片。');
+        if (!blob) throw new Error(t('imageCompressFailed'));
         return {
           imageData: await blobToDataUrl(blob),
           imageName: file.name.slice(0, 160) || '图片',
@@ -1874,8 +2316,8 @@
       }
 
       async function setAvatarFromFile(file) {
-        if (!/^image\/(?:jpeg|png|webp|gif)$/i.test(file.type)) throw new Error('请选择 JPG、PNG、WebP 或 GIF 图片。');
-        if (file.size > 20 * 1024 * 1024) throw new Error('头像图片不能超过 20 MB。');
+        if (!/^image\/(?:jpeg|png|webp|gif)$/i.test(file.type)) throw new Error(t('invalidImageType'));
+        if (file.size > 20 * 1024 * 1024) throw new Error(t('avatarTooLarge'));
 
         const sourceImage = await decodeImage(await readImageFile(file));
         const avatarCanvas = document.createElement('canvas');
@@ -1912,9 +2354,9 @@
         if (!file) return;
         try {
           await setAvatarFromFile(file);
-          showToast('头像已更新。');
+          showToast(t('avatarUpdated'));
         } catch (error) {
-          showToast(error instanceof Error ? error.message : '头像上传失败。');
+          showToast(error instanceof Error ? error.message : t('avatarFailed'));
         } finally {
           event.target.value = '';
         }
@@ -1924,7 +2366,7 @@
         state.avatarFileName = '';
         syncAvatarImage();
         changed();
-        showToast('头像已移除，恢复为联系人首字母。');
+        showToast(t('avatarRemoved'));
       });
       $('#networkType').addEventListener('change', (event) => { state.network = event.target.value === 'wifi' ? 'wifi' : '5G'; changed(); });
       $('#batteryLevel').addEventListener('input', (event) => {
@@ -1932,7 +2374,13 @@
         $('#batteryValue').value = `${state.battery}%`;
         changed();
       });
-      $('#timeSeparator').addEventListener('input', (event) => { state.timeSeparator = event.target.value; changed(); });
+      $('#displayLanguage').addEventListener('change', (event) => changeLanguage(event.target.value));
+      $('#normalizeTopTime').addEventListener('click', normalizeTopSeparator);
+      $('#timeSeparator').addEventListener('input', (event) => {
+        state.timeSeparator = event.target.value;
+        state.timeSeparatorSystem = false;
+        changed();
+      });
       $('#composerText').addEventListener('input', (event) => { state.composerText = event.target.value; changed(); });
       $('#deliveryStatus').addEventListener('change', (event) => {
         state.deliveryStatus = event.target.value === 'read' || event.target.value === 'delivered' ? event.target.value : 'none';
@@ -1952,11 +2400,13 @@
       });
       $('#addTimeSeparator').addEventListener('click', addTimeSeparator);
       $('#toggleTypingIndicator').addEventListener('click', toggleTypingIndicator);
+      $('#swapParticipants').addEventListener('click', swapParticipants);
       $('#parseConversation').addEventListener('click', () => parseBulkConversation(true));
       $('#bulkConversation').addEventListener('paste', () => {
         setTimeout(() => parseBulkConversation(true), 0);
       });
       $('#exportPng').addEventListener('click', exportPng);
+      $('#resetAll').addEventListener('click', resetAll);
       $('#saveJson').addEventListener('click', saveJson);
       $('#loadJson').addEventListener('click', () => $('#jsonFile').click());
       $('#jsonFile').addEventListener('change', (event) => {
@@ -1966,8 +2416,7 @@
       $('#duplicatePage').addEventListener('click', duplicatePage);
 
       importFromHash();
-      syncTopFields();
-      renderMessageEditor();
+      changeLanguage(state.language);
       renderPreview();
       autosave();
     })();
