@@ -252,7 +252,7 @@
 
     .message-card {
       display: grid;
-      grid-template-columns: 78px minmax(0, 1fr) auto;
+      grid-template-columns: 96px minmax(0, 1fr) auto;
       gap: 10px;
       align-items: start;
       padding: 12px;
@@ -298,7 +298,18 @@
 
     .image-message-meta .button { min-height: 34px; justify-self: start; }
 
-    .sender-select { height: 38px; padding: 0 9px; background: #fff; }
+    .sender-select {
+      height: 38px;
+      padding: 0 9px;
+      background: #fff;
+      text-align: center;
+      text-align-last: center;
+    }
+
+    html[lang="en"] .sender-select {
+      font-size: 13px;
+      letter-spacing: -.2px;
+    }
 
     .entry-kind {
       display: flex;
@@ -489,9 +500,9 @@
       .field.wide { grid-column: auto; }
       .top-info-grid .contact-name-field,
       .top-info-grid .avatar-field { grid-column: auto; }
-      .message-card { grid-template-columns: 72px minmax(0, 1fr); }
+      .message-card { grid-template-columns: 96px minmax(0, 1fr); }
       .message-actions { grid-column: 1 / -1; display: flex; }
-      .icon-button.delete { width: 30px; }
+      .icon-button.delete { width: auto; min-width: 72px; padding: 0 10px; }
       .image-message-editor { grid-template-columns: 76px minmax(0, 1fr); }
       .image-message-thumb { width: 76px; height: 64px; }
       .preview-toolbar { align-items: flex-start; flex-direction: column; }
@@ -1259,6 +1270,13 @@
         return { speaker: match[1].trim(), text: match[2] };
       }
 
+      function fixedSpeakerDirection(speaker) {
+        const key = String(speaker || '').trim().toLocaleLowerCase();
+        if (key === 'tj') return 'received';
+        if (key === 'b') return 'sent';
+        return null;
+      }
+
       function parseImportedText(source) {
         const lines = source.replace(/\r\n?/g, '\n').split('\n');
         const parsed = [];
@@ -1284,8 +1302,9 @@
           current = null;
         }
 
-        function addMessage(direction, text) {
+        function addMessage(direction, text, speakerKey = '') {
           current = { type: 'message', direction, text };
+          if (speakerKey) current.speakerKey = speakerKey;
           parsed.push(current);
           messageCount += 1;
         }
@@ -1331,12 +1350,13 @@
           if (speakerLine) {
             const key = speakerLine.speaker.toLocaleLowerCase();
             if (!speakers.has(key) && speakers.size < 2) {
-              const direction = speakers.size === 0 ? 'sent' : 'received';
+              const direction = fixedSpeakerDirection(speakerLine.speaker)
+                || (speakers.size === 0 ? 'sent' : 'received');
               speakers.set(key, direction);
               speakerNames.push(speakerLine.speaker);
             }
             if (speakers.has(key)) {
-              addMessage(speakers.get(key), speakerLine.text);
+              addMessage(speakers.get(key), speakerLine.text, key);
               continue;
             }
           }
@@ -1352,7 +1372,34 @@
           }
         }
 
-        return { parsed, messageCount, ignoredBeforeFirstMarker, speakerNames };
+        const participantNames = {};
+        const finalDirections = new Map();
+        const usedDirections = new Set();
+        speakerNames.forEach((name, index) => {
+          const direction = fixedSpeakerDirection(name);
+          if (!direction) return;
+          finalDirections.set(name.toLocaleLowerCase(), direction);
+          usedDirections.add(direction);
+          participantNames[direction] = name;
+        });
+        speakerNames.forEach((name, index) => {
+          const key = name.toLocaleLowerCase();
+          if (finalDirections.has(key)) return;
+          const preferred = index === 0 ? 'sent' : 'received';
+          const direction = usedDirections.has(preferred)
+            ? (preferred === 'sent' ? 'received' : 'sent')
+            : preferred;
+          finalDirections.set(key, direction);
+          usedDirections.add(direction);
+          participantNames[direction] = name;
+        });
+        parsed.forEach((item) => {
+          if (!item.speakerKey) return;
+          item.direction = finalDirections.get(item.speakerKey) || item.direction;
+          delete item.speakerKey;
+        });
+
+        return { parsed, messageCount, ignoredBeforeFirstMarker, participantNames };
       }
 
       function parseBulkConversation(showResult = true) {
@@ -1361,14 +1408,8 @@
           if (showResult) showToast(t('noMessages'));
           return false;
         }
-        if (result.speakerNames[0]) {
-          const previousSent = state.participants.sent;
-          state.participants.sent = result.speakerNames[0];
-          if (!result.speakerNames[1] && state.participants.received.toLocaleLowerCase() === result.speakerNames[0].toLocaleLowerCase()) {
-            state.participants.received = previousSent.toLocaleLowerCase() === result.speakerNames[0].toLocaleLowerCase() ? t('received') : previousSent;
-          }
-        }
-        if (result.speakerNames[1]) state.participants.received = result.speakerNames[1];
+        if (result.participantNames.sent) state.participants.sent = result.participantNames.sent;
+        if (result.participantNames.received) state.participants.received = result.participantNames.received;
         state.messages = result.parsed;
         syncTopSeparatorToFirstInsertedTime();
         messageImageCache.clear();
