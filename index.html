@@ -1602,6 +1602,28 @@
         return y + (height - blockHeight) / 2 + ascent;
       }
 
+      function drawVisuallyCenteredText(ctx, text, centerX, centerY, fallbackSize) {
+        ctx.save();
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+        const metrics = ctx.measureText(text);
+        const left = Number(metrics.actualBoundingBoxLeft);
+        const right = Number(metrics.actualBoundingBoxRight);
+        const ascent = Number(metrics.actualBoundingBoxAscent);
+        const descent = Number(metrics.actualBoundingBoxDescent);
+        const hasBounds = Number.isFinite(left) && Number.isFinite(right) && right > -left
+          && Number.isFinite(ascent) && Number.isFinite(descent) && ascent + descent > 0;
+        if (!hasBounds) {
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(text, centerX, centerY + fallbackSize * .02);
+          ctx.restore();
+          return;
+        }
+        ctx.fillText(text, centerX + (left - right) / 2, centerY + (ascent - descent) / 2);
+        ctx.restore();
+      }
+
       function graphemes(value) {
         if (typeof Intl !== 'undefined' && Intl.Segmenter) {
           return Array.from(new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(value), (part) => part.segment);
@@ -1739,10 +1761,14 @@
         } else {
           const initial = graphemes(displayName.trim())[0] || '';
           ctx.fillStyle = '#fff';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
           setContactNameFont(ctx, 400, 21.5, initial);
-          ctx.fillText(initial.toLocaleUpperCase(), 195, 88.5);
+          const avatarText = initial.toLocaleUpperCase();
+          if (containsEmoji(avatarText)) drawVisuallyCenteredText(ctx, avatarText, 195, 88, 21.5);
+          else {
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(avatarText, 195, 88.5);
+          }
         }
         ctx.restore();
 
@@ -1752,7 +1778,7 @@
         while (name && ctx.measureText(name).width > maxName) name = graphemes(name).slice(0, -1).join('');
         if (name !== displayName && name) name = graphemes(name).slice(0, -1).join('') + '…';
         const nameWidth = ctx.measureText(name).width;
-        const pillWidth = Math.min(142, Math.max(57, nameWidth + 24));
+        const pillWidth = Math.min(142, Math.max(57, nameWidth + 36));
         const pillX = 195 - pillWidth / 2;
         ctx.save();
         ctx.shadowColor = 'rgba(22, 28, 36, .105)';
@@ -1762,19 +1788,24 @@
         ctx.restore();
 
         ctx.fillStyle = '#111';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
         setContactNameFont(ctx, 600, 15.5, name);
-        ctx.fillText(name, 191, 132.5);
+        const nameCenterX = 188.5;
+        if (containsEmoji(name)) drawVisuallyCenteredText(ctx, name, nameCenterX, 132.5, 15.5);
+        else {
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(name, nameCenterX, 132.5);
+        }
 
         ctx.strokeStyle = '#aaaeb4';
         ctx.lineWidth = 1.8;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
+        const chevronX = pillX + pillWidth - 12.5;
         ctx.beginPath();
-        ctx.moveTo(198 + nameWidth / 2, 128.5);
-        ctx.lineTo(201 + nameWidth / 2, 132.5);
-        ctx.lineTo(198 + nameWidth / 2, 136.5);
+        ctx.moveTo(chevronX - 2.5, 128.5);
+        ctx.lineTo(chevronX + .5, 132.5);
+        ctx.lineTo(chevronX - 2.5, 136.5);
         ctx.stroke();
 
         drawFloatingCircle(ctx, 342, 82, 20.5);
